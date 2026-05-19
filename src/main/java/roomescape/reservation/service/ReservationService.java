@@ -46,7 +46,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation reserve(ReservationSaveCommand command) {
+    public Reservation reserve(String name, ReservationSaveCommand command) {
         ReservationTime reservationTime = getReservationTime(command.timeId());
         reservationTime.validateIsInactive();
 
@@ -58,7 +58,7 @@ public class ReservationService {
 
         validateNotAlreadyBookedByOthers(reservationDate.getId(), reservationTime.getId(), theme.getId());
         return reservationRepository.save(
-                Reservation.create(command.name(), reservationDate, reservationTime, theme)
+                Reservation.create(name, reservationDate, reservationTime, theme)
         );
     }
 

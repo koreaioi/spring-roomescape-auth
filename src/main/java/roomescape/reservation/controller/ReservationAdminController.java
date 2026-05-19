@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import roomescape.common.auth.annotation.AuthGuard;
+import roomescape.common.auth.annotation.LoginMember;
+import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.request.ReservationChangeScheduleDto;
 import roomescape.reservation.controller.dto.request.ReservationSaveDto;
 import roomescape.reservation.controller.dto.response.ReservationDetailDto;
@@ -12,6 +15,8 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.service.ReservationService;
 
 import java.util.List;
+
+import static roomescape.member.domain.Role.MANAGER;
 
 @RestController
 @RequestMapping("/admin")
@@ -29,9 +34,12 @@ public class ReservationAdminController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationDetailDto> createReservation(@Valid @RequestBody ReservationSaveDto dto) {
-//        request.getHeader("Authorization", )
-        Reservation reservation = reservationService.reserve(dto.toCommand());
+    @AuthGuard(roles = {MANAGER})
+    public ResponseEntity<ReservationDetailDto> createReservation(
+            @Valid @RequestBody ReservationSaveDto dto,
+            @LoginMember Member manager
+    ) {
+        Reservation reservation = reservationService.reserve(manager.getName(), dto.toCommand());
         ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
         return ResponseEntity.ok(responseData);
     }
