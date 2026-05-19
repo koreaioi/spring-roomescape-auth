@@ -31,7 +31,8 @@ public class JwtExtractor {
     }
 
     public Long getId(String token){
-        return getIdFromToken(token, "id");
+        String id = getClaimFromToken(token, "id");
+        return Long.parseLong(id);
     }
 
     public String getName(String token){
@@ -50,12 +51,6 @@ public class JwtExtractor {
     private String getClaimFromToken(String token, String claimName) {
         Claims claims = parseClaims(token);
         return claims.get(claimName, String.class);
-    }
-
-    private Long getIdFromToken(String token, String claimName) {
-        Claims claims = parseClaims(token);
-        Number id = claims.get(claimName, Number.class);
-        return id.longValue();
     }
 
     private Claims parseClaims(String token) {
