@@ -25,7 +25,10 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        HandlerMethod handlerMethod = (HandlerMethod)handler;
+        if (!(handler instanceof HandlerMethod handlerMethod)) {
+            return true;
+        }
+
         AuthGuard authGuard = handlerMethod.getMethodAnnotation(AuthGuard.class);
         if (authGuard == null) {
             return true;
