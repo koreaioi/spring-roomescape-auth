@@ -9,26 +9,12 @@ import io.restassured.RestAssured;
 
 import java.time.LocalDate;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.common.AcceptanceTest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class ReservationDateControllerTest {
-
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
+class ReservationDateControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("사용자는 예약 가능한 날짜 목록을 조회한다.")
@@ -44,8 +30,8 @@ class ReservationDateControllerTest {
     @DisplayName("사용자는 오늘 이후의 예약 날짜 목록을 조회한다.")
     void getReservationDatesAfterToday() {
         String tomorrow = LocalDate.now().plusDays(1).toString();
-        Integer id = createReservationDate(tomorrow);
-        updateDateStatus(id, true);
+        Integer id = createReservationDate(managerToken, tomorrow);
+        updateDateStatus(managerToken, id, true);
 
         RestAssured.given().log().all()
                 .when().get("/member/dates")
@@ -62,8 +48,8 @@ class ReservationDateControllerTest {
     )
     void getReservationDatesExcludePastDates() {
         String tomorrow = LocalDate.now().plusDays(1).toString();
-        Integer futureDateId = createReservationDate(tomorrow);
-        updateDateStatus(futureDateId, true);
+        Integer futureDateId = createReservationDate(managerToken, tomorrow);
+        updateDateStatus(managerToken, futureDateId, true);
 
         RestAssured.given().log().all()
                 .when().get("/member/dates")
@@ -76,9 +62,9 @@ class ReservationDateControllerTest {
     @Test
     @DisplayName("사용자는 비활성화된 날짜를 조회할 수 없다.")
     void getReservationDatesExcludeInactiveDates() {
-        Integer activeDateId = createReservationDate(LocalDate.now().plusDays(1).toString());
-        Integer inactiveDateId = createReservationDate(LocalDate.now().plusDays(2).toString());
-        updateDateStatus(activeDateId, true);
+        Integer activeDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
+        Integer inactiveDateId = createReservationDate(managerToken, LocalDate.now().plusDays(2).toString());
+        updateDateStatus(managerToken, activeDateId, true);
 
         RestAssured.given().log().all()
                 .when().get("/member/dates")

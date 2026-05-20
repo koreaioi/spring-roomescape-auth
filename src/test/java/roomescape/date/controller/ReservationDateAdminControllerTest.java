@@ -13,6 +13,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.AcceptanceTest;
@@ -29,6 +30,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
     @DisplayName("예약 날짜 목록을 조회한다.")
     void get_reservation_dates() {
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/dates")
                 .then().log().all()
                 .statusCode(200)
@@ -42,6 +44,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
         params.put("date", date);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/dates")
@@ -50,6 +53,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
                 .body("date", is(date));
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/dates")
                 .then().log().all()
                 .statusCode(200)
@@ -59,12 +63,13 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("이미 등록된 날짜를 또 등록하면 예외가 발생한다.")
     void create_duplicated_date() {
-        createReservationDate(date);
+        createReservationDate(managerToken, date);
 
         Map<String, String> params = new HashMap<>();
         params.put("date", date);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/dates")
@@ -80,6 +85,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
         params.put("date", date);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/dates")
@@ -87,6 +93,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
                 .statusCode(200);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/dates")
                 .then().log().all()
                 .statusCode(200)
@@ -100,6 +107,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
         params.put("date", null);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/dates")
@@ -116,10 +124,11 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
     )
     void getReservationDatesAfterToday() {
         String tomorrow = LocalDate.now().plusDays(1).toString();
-        Integer id = createReservationDate(tomorrow);
-        updateDateStatus(id, true);
+        Integer id = createReservationDate(managerToken, tomorrow);
+        updateDateStatus(managerToken, id, true);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/dates")
                 .then().log().all()
                 .statusCode(200)
@@ -129,7 +138,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("예약이 이미 된 날짜를 관리자가 비활성화할 수 있다.")
     void shouldThrowException_WhenDeleteDate_AboutAlreadyReserved() {
-        Integer dateId = createReservationDate(date);
+        Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime("10:00");
         Integer themeId = createTheme("테마1");
 
@@ -139,6 +148,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
         updateParams.put("isActive", false);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(updateParams)
                 .when().patch("/admin/dates/" + dateId + "/status")

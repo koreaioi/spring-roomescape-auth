@@ -82,7 +82,7 @@ class ReservationTimeAdminControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("이미 예약된 시간이어도 관리자가 비활성화할 수 있다.")
     void shouldThrowException_WhenDeleteDate_AboutAlreadyReserved() {
-        Integer dateId = createReservationDate(LocalDate.of(2099, 1, 1).toString());
+        Integer dateId = createReservationDate(managerToken, LocalDate.of(2099, 1, 1).toString());
         Integer timeId = createReservationTime("10:00");
         Integer themeId = createTheme("테마1");
         createReservationWithToken(managerToken, dateId, timeId, themeId);

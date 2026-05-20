@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import roomescape.common.auth.annotation.AuthGuard;
 import roomescape.date.controller.dto.request.ReservationDateSaveDto;
 import roomescape.date.controller.dto.request.ReservationDateStatusUpdateDto;
 import roomescape.date.controller.dto.response.ReservationDateDetailDto;
@@ -12,6 +13,8 @@ import roomescape.date.service.ReservationDateService;
 
 import java.util.List;
 
+import static roomescape.member.domain.Role.MANAGER;
+
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class ReservationDateAdminController {
 
     private final ReservationDateService reservationDateService;
 
+    @AuthGuard(roles = MANAGER)
     @GetMapping("/dates")
     public ResponseEntity<List<ReservationDateDetailDto>> getReservationDates() {
         List<ReservationDateDetailDto> responseData = reservationDateService.readDates().stream()
@@ -27,6 +31,7 @@ public class ReservationDateAdminController {
         return ResponseEntity.ok(responseData);
     }
 
+    @AuthGuard(roles = MANAGER)
     @PostMapping("/dates")
     public ResponseEntity<ReservationDateDetailDto> create(
             @Validated @RequestBody ReservationDateSaveDto dto
@@ -36,6 +41,7 @@ public class ReservationDateAdminController {
         return ResponseEntity.ok(responseData);
     }
 
+    @AuthGuard(roles = MANAGER)
     @PatchMapping("/dates/{id}/status")
     public ResponseEntity<ReservationDateDetailDto> updateStatus(
             @PathVariable Long id, @Validated @RequestBody ReservationDateStatusUpdateDto dto) {

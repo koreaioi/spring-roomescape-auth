@@ -88,6 +88,7 @@ class MissionStepTest extends AcceptanceTest {
         Map<String, Object> date = new HashMap<>();
         date.put("date", "2099-01-01");
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(date)
                 .when().post("/admin/dates")

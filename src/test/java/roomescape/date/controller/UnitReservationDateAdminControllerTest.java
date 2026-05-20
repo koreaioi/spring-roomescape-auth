@@ -1,21 +1,26 @@
 package roomescape.date.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.common.auth.jwt.JwtExtractor;
+import roomescape.common.auth.jwt.JwtProvider;
 import roomescape.common.auth.jwt.JwtValidator;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.service.ReservationDateService;
+import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -39,7 +44,20 @@ class UnitReservationDateAdminControllerTest {
     private JwtExtractor jwtExtractor;
 
     @MockitoBean
+    private JwtProvider jwtProvider;
+
+    @MockitoBean
     private MemberRepository memberRepository;
+
+    private String managerToken;
+
+    @BeforeEach
+    void setUp() {
+        managerToken = "Bearer mock-manager-token";
+        when(jwtExtractor.extractJwtToken(any())).thenReturn(Optional.of("mock-manager-token"));
+        when(jwtExtractor.getRole("mock-manager-token")).thenReturn(Role.MANAGER.name());
+        when(jwtValidator.validateJwtToken("mock-manager-token")).thenReturn(true);
+    }
 
     @Test
     @DisplayName("날짜를 정상적으로 등록하면, 등록한 날짜 정보를 반환한다.")
@@ -57,6 +75,7 @@ class UnitReservationDateAdminControllerTest {
                 """.formatted(date);
 
         mockMvc.perform(post("/admin/dates")
+                        .header(HttpHeaders.AUTHORIZATION, managerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isOk())
@@ -77,6 +96,7 @@ class UnitReservationDateAdminControllerTest {
                 """;
 
         mockMvc.perform(post("/admin/dates")
+                        .header(HttpHeaders.AUTHORIZATION, managerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isBadRequest())
@@ -101,6 +121,7 @@ class UnitReservationDateAdminControllerTest {
                 """.formatted(date);
 
         mockMvc.perform(post("/admin/dates")
+                        .header(HttpHeaders.AUTHORIZATION, managerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isConflict())
@@ -129,6 +150,7 @@ class UnitReservationDateAdminControllerTest {
                 """.formatted(changeStatus);
 
         mockMvc.perform(patch("/admin/dates/{id}/status", reservationDate.getId())
+                        .header(HttpHeaders.AUTHORIZATION, managerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isOk())
@@ -149,6 +171,7 @@ class UnitReservationDateAdminControllerTest {
                 """;
 
         mockMvc.perform(patch("/admin/dates/1/status")
+                        .header(HttpHeaders.AUTHORIZATION, managerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isBadRequest())
@@ -167,7 +190,7 @@ class UnitReservationDateAdminControllerTest {
         when(reservationDateService.readDates())
                 .thenReturn(List.of(reservationDate));
 
-        mockMvc.perform(get("/admin/dates"))
+        mockMvc.perform(get("/admin/dates").header(HttpHeaders.AUTHORIZATION, managerToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
                 .andExpect(jsonPath("$[0].id").value(reservationDate.getId()))

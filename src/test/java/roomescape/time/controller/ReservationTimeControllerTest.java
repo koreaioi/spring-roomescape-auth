@@ -23,7 +23,7 @@ class ReservationTimeControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("사용자는 특정 날짜와 테마의 예약 가능한 시간을 조회한다.")
     void readAvailableTimes() {
-        Integer dateId = createReservationDate(LocalDate.now().plusDays(1).toString());
+        Integer dateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
         Integer timeId = createReservationTime(startAt1);
         updateTimeStatus(timeId, true);
         Integer themeId = createTheme(themeName);
@@ -42,7 +42,7 @@ class ReservationTimeControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("이미 예약된 시간은 예약 가능한 시간 목록에서 제외된다.")
     void readAvailableTimesExcludeReservedTime() {
-        Integer dateId = createReservationDate(LocalDate.now().plusDays(1).toString());
+        Integer dateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
         Integer timeId = createReservationTime(startAt1);
         Integer availableTimeId = createReservationTime(startAt2);
         updateTimeStatus(timeId, true);
@@ -64,7 +64,7 @@ class ReservationTimeControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("예약 가능한 시간 조회시, 비활성화된 시간은 제외된다.")
     void readAvailableTimesExcludeInactive() {
-        Integer dateId = createReservationDate(LocalDate.now().plusDays(1).toString());
+        Integer dateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
         Integer activeTimeId = createReservationTime(startAt1);
         Integer inactiveTimeId = createReservationTime(startAt2);
         updateTimeStatus(activeTimeId, true);
@@ -83,7 +83,7 @@ class ReservationTimeControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("예약 시간이 없으면 빈 목록을 반환한다.")
     void readAvailableTimesEmpty() {
-        Integer dateId = createReservationDate(LocalDate.now().plusDays(1).toString());
+        Integer dateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
         Integer themeId = createTheme(themeName);
 
         RestAssured.given().log().all()
