@@ -3,9 +3,14 @@ package roomescape.member.domain;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import roomescape.common.auth.exception.AuthException;
+import roomescape.member.exception.MemberException;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import static roomescape.common.auth.exception.AuthExceptionInformation.INTERNAL_SERVER_CRYPTO_ERROR;
+import static roomescape.member.exception.MemberExceptionInformation.PASSWORD_NOT_MATCH;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -29,7 +34,7 @@ public class Password {
             byte[] digest = md.digest(bytes);
             return convertHex(digest);
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(); // TODO
+            throw new AuthException(INTERNAL_SERVER_CRYPTO_ERROR);
         }
     }
 
@@ -43,7 +48,7 @@ public class Password {
 
     public void validateMatches(String password) {
         if (isNotMatches(password)) {
-            throw new IllegalArgumentException(); // TODO
+            throw new MemberException(PASSWORD_NOT_MATCH);
         }
     }
 
