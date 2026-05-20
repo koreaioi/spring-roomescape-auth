@@ -11,7 +11,7 @@ import static roomescape.theme.exception.ThemeErrorInformation.*;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Theme {
 
-    public static final String DEFAULT_THUMBNAIL_URL = "dummy-url";
+    public static final String DEFAULT_THUMBNAIL_URL = "DEFAULT_THUMBNAIL_URL";
 
     private Long id;
     private String name;
@@ -62,7 +62,7 @@ public class Theme {
 
     private static String resolveThumbnailUrl(String thumbnailUrl) {
         if (thumbnailUrl.isBlank()) {
-            return "DEFAULT_THUMBNAIL_URL";
+            return DEFAULT_THUMBNAIL_URL;
         }
         return thumbnailUrl;
     }
