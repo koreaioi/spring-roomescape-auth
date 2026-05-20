@@ -11,9 +11,11 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.common.auth.annotation.LoginMember;
 import roomescape.common.auth.exception.AuthException;
 import roomescape.member.domain.Member;
+import roomescape.member.exception.MemberException;
 import roomescape.member.repository.MemberRepository;
 
 import static roomescape.common.auth.exception.AuthExceptionInformation.UN_AUTHORIZED;
+import static roomescape.member.exception.MemberExceptionInformation.MEMBER_NOT_FOUND;
 
 
 @Component
@@ -43,7 +45,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     private Member getMember(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
     }
 
 }
