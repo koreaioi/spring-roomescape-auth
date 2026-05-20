@@ -30,12 +30,12 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         }
 
         String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader == null) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             throw new AuthException(UN_AUTHORIZED);
         }
 
-        String token = authorizationHeader.substring("Bearer ".length());
-        if (!jwtValidator.validateJwtToken(token)) {
+        String token = authorizationHeader.substring("Bearer ".length()).trim();
+        if (token.isEmpty() || !jwtValidator.validateJwtToken(token)) {
             throw new AuthException(UN_AUTHORIZED);
         }
 
