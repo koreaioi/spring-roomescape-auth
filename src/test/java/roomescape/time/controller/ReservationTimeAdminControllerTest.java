@@ -6,6 +6,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import roomescape.common.AcceptanceTest;
 
 import java.time.LocalDate;
@@ -28,6 +29,7 @@ class ReservationTimeAdminControllerTest extends AcceptanceTest {
     @DisplayName("관리자는 예약 시간 목록을 조회한다.")
     void get_reservation_times() {
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/times")
                 .then().log().all()
                 .statusCode(200)
@@ -37,12 +39,13 @@ class ReservationTimeAdminControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("관리자로 등록된 시간 조회시, 활성화/비활성화된 시간을 모두 조회한다.")
     void readAvailableTimesExcludeInactive() {
-        Integer activeTimeId = createReservationTime(startAt1);
-        Integer inactiveTimeId = createReservationTime(startAt2);
-        updateTimeStatus(activeTimeId, true);
-        updateTimeStatus(inactiveTimeId, false);
+        Integer activeTimeId = createReservationTime(managerToken, startAt1);
+        Integer inactiveTimeId = createReservationTime(managerToken, startAt2);
+        updateTimeStatus(managerToken, activeTimeId, true);
+        updateTimeStatus(managerToken, inactiveTimeId, false);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/times")
                 .then().log().all()
                 .statusCode(200)
@@ -53,9 +56,10 @@ class ReservationTimeAdminControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("관리자는 예약 시간을 생성한다.")
     void create_reservation_time() {
-        Integer timeId = createReservationTime(startAt1);
+        Integer timeId = createReservationTime(managerToken, startAt1);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/times")
                 .then().log().all()
                 .statusCode(200)
@@ -71,6 +75,7 @@ class ReservationTimeAdminControllerTest extends AcceptanceTest {
         params.put("startAt", null);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/times")
@@ -83,7 +88,7 @@ class ReservationTimeAdminControllerTest extends AcceptanceTest {
     @DisplayName("이미 예약된 시간이어도 관리자가 비활성화할 수 있다.")
     void shouldThrowException_WhenDeleteDate_AboutAlreadyReserved() {
         Integer dateId = createReservationDate(managerToken, LocalDate.of(2099, 1, 1).toString());
-        Integer timeId = createReservationTime("10:00");
+        Integer timeId = createReservationTime(managerToken, "10:00");
         Integer themeId = createTheme(managerToken, "테마1");
         createReservationWithToken(managerToken, dateId, timeId, themeId);
 
@@ -91,6 +96,7 @@ class ReservationTimeAdminControllerTest extends AcceptanceTest {
         updateParams.put("isActive", false);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(updateParams)
                 .when().patch("/admin/times/" + timeId + "/status")

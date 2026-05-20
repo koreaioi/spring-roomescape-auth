@@ -44,7 +44,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("사용자는 예약을 생성한다.")
     void create_reservation() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
         createReservationWithToken(memberToken, dateId, timeId, themeId);
 
@@ -62,8 +62,8 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer dateId = createReservationDate(managerToken, date);
         Integer themeId = createTheme(managerToken, themeName);
 
-        Integer timeId = createReservationTime(startAt);
-        Integer otherTimeId = createReservationTime(otherStartAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
+        Integer otherTimeId = createReservationTime(managerToken, otherStartAt);
 
         createReservationWithToken(memberToken, dateId, timeId, themeId);
         createReservationWithToken(anotherToken, dateId, otherTimeId, themeId);
@@ -97,7 +97,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("dateId가 없으면 예약 생성에 실패한다.")
     void create_reservation_without_date_id() {
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
         Map<String, Object> params = new HashMap<>();
@@ -140,7 +140,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("themeId가 없으면 예약 생성에 실패한다.")
     void create_reservation_without_theme_id() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", dateId);
@@ -161,7 +161,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("예약된 날짜/시간/테마를 중복 예약하면 예외가 발생한다.")
     void reserved_duplicated() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
         createReservationWithToken(memberToken, dateId, timeId, themeId);
@@ -185,7 +185,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("취소된 예약을 동일한 사람이 새롭게 예약할 수 있다.")
     void reserved_when_canceled_same_name() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
@@ -209,7 +209,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("취소된 예약을 동일한 사람이 새롭게 예약할 수 있다.")
     void reserved_when_canceled_another_name() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
@@ -233,7 +233,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("사용자는 자신의 예약을 취소한다.")
     void cancel() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
@@ -253,7 +253,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("본인의 예약이 아닌데 취소하면 예외가 발생한다.")
     void cancel_not_owner() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
@@ -271,7 +271,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("이미 취소된 예약을 취소하면 예외가 발생한다.")
     void cancel_already_canceled() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
@@ -311,8 +311,8 @@ class ReservationControllerTest extends AcceptanceTest {
         String futureTime = LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString();
         Integer dateId = createReservationDate(managerToken, date);
         Integer changedDateId = createReservationDate(managerToken, futureDate);
-        Integer timeId = createReservationTime(startAt);
-        Integer changedTimeId = createReservationTime(futureTime);
+        Integer timeId = createReservationTime(managerToken, startAt);
+        Integer changedTimeId = createReservationTime(managerToken, futureTime);
         Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
 
@@ -336,8 +336,8 @@ class ReservationControllerTest extends AcceptanceTest {
     void changeSchedule_not_owner() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer changedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
-        Integer timeId = createReservationTime(startAt);
-        Integer changedTimeId = createReservationTime(LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
+        Integer timeId = createReservationTime(managerToken, startAt);
+        Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
 
@@ -360,8 +360,8 @@ class ReservationControllerTest extends AcceptanceTest {
     void changeSchedule_already_canceled() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer changedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
-        Integer timeId = createReservationTime(startAt);
-        Integer changedTimeId = createReservationTime(LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
+        Integer timeId = createReservationTime(managerToken, startAt);
+        Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
         cancelReservationWithToken(memberToken, reservationId);
@@ -388,7 +388,7 @@ class ReservationControllerTest extends AcceptanceTest {
     )
     void changeSchedule_past() {
         Integer changedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
-        Integer changedTimeId = createReservationTime(LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
+        Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
 
         Long sqlSavedId = 1L;
 
@@ -415,8 +415,8 @@ class ReservationControllerTest extends AcceptanceTest {
     void changeSchedule_new_datetime_is_past() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer pastDateId = 1;
-        Integer timeId = createReservationTime(startAt);
-        Integer changedTimeId = createReservationTime(LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
+        Integer timeId = createReservationTime(managerToken, startAt);
+        Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
 
@@ -438,7 +438,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("비활성화된 날짜로 예약을 생성하면 예외가 발생한다.")
     void create_reservation_with_inactive_date() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
         updateDateStatus(managerToken, dateId, false);
 
@@ -461,9 +461,9 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("비활성화된 시간으로 예약을 생성하면 예외가 발생한다.")
     void create_reservation_with_inactive_time() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
-        updateTimeStatus(timeId, false);
+        updateTimeStatus(managerToken, timeId, false);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", dateId);
@@ -484,7 +484,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("비활성화된 테마로 예약을 생성하면 예외가 발생한다.")
     void create_reservation_with_inactive_theme() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
         updateThemeStatus(managerToken, themeId, false);
 

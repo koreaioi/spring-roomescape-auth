@@ -24,8 +24,8 @@ class ReservationTimeControllerTest extends AcceptanceTest {
     @DisplayName("사용자는 특정 날짜와 테마의 예약 가능한 시간을 조회한다.")
     void readAvailableTimes() {
         Integer dateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
-        Integer timeId = createReservationTime(startAt1);
-        updateTimeStatus(timeId, true);
+        Integer timeId = createReservationTime(managerToken, startAt1);
+        updateTimeStatus(managerToken, timeId, true);
         Integer themeId = createTheme(managerToken, themeName);
 
         RestAssured.given().log().all()
@@ -43,10 +43,10 @@ class ReservationTimeControllerTest extends AcceptanceTest {
     @DisplayName("이미 예약된 시간은 예약 가능한 시간 목록에서 제외된다.")
     void readAvailableTimesExcludeReservedTime() {
         Integer dateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
-        Integer timeId = createReservationTime(startAt1);
-        Integer availableTimeId = createReservationTime(startAt2);
-        updateTimeStatus(timeId, true);
-        updateTimeStatus(availableTimeId, true);
+        Integer timeId = createReservationTime(managerToken, startAt1);
+        Integer availableTimeId = createReservationTime(managerToken, startAt2);
+        updateTimeStatus(managerToken, timeId, true);
+        updateTimeStatus(managerToken, availableTimeId, true);
         Integer themeId = createTheme(managerToken, themeName);
         createReservationWithToken(memberToken, dateId, timeId, themeId);
 
@@ -65,10 +65,10 @@ class ReservationTimeControllerTest extends AcceptanceTest {
     @DisplayName("예약 가능한 시간 조회시, 비활성화된 시간은 제외된다.")
     void readAvailableTimesExcludeInactive() {
         Integer dateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
-        Integer activeTimeId = createReservationTime(startAt1);
-        Integer inactiveTimeId = createReservationTime(startAt2);
-        updateTimeStatus(activeTimeId, true);
-        updateTimeStatus(inactiveTimeId, false);
+        Integer activeTimeId = createReservationTime(managerToken, startAt1);
+        Integer inactiveTimeId = createReservationTime(managerToken, startAt2);
+        updateTimeStatus(managerToken, activeTimeId, true);
+        updateTimeStatus(managerToken, inactiveTimeId, false);
         Integer themeId = createTheme(managerToken, themeName);
 
         RestAssured.given().log().all()

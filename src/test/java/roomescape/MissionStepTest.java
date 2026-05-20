@@ -50,6 +50,7 @@ class MissionStepTest extends AcceptanceTest {
         params.put("startAt", "10:00");
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/times")
@@ -57,6 +58,7 @@ class MissionStepTest extends AcceptanceTest {
                 .statusCode(200);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/times")
                 .then().log().all()
                 .statusCode(200)
@@ -68,6 +70,7 @@ class MissionStepTest extends AcceptanceTest {
         Map<String, String> time = new HashMap<>();
         time.put("startAt", "10:00");
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(time)
                 .when().post("/admin/times")

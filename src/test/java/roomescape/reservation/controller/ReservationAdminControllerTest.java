@@ -44,7 +44,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     @DisplayName("관리자는 예약을 생성한다.")
     void create_reservation() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
         createReservationWithToken(managerToken, dateId, timeId, themeId);
@@ -61,7 +61,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     @DisplayName("관리자는 예약을 취소할 수 있다.")
     void cancelByManager_reservation() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
         Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
@@ -83,7 +83,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("dateId가 없으면 예약 생성에 실패한다.")
     void create_reservation_without_date_id() {
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
         Map<String, Object> params = new HashMap<>();
@@ -126,7 +126,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     @DisplayName("themeId가 없으면 예약 생성에 실패한다.")
     void create_reservation_without_theme_id() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(startAt);
+        Integer timeId = createReservationTime(managerToken, startAt);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", dateId);
@@ -150,8 +150,8 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         String futureTime = LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString();
         Integer dateId = createReservationDate(managerToken, date);
         Integer changedDateId = createReservationDate(managerToken, futureDate);
-        Integer timeId = createReservationTime(startAt);
-        Integer changedTimeId = createReservationTime(futureTime);
+        Integer timeId = createReservationTime(managerToken, startAt);
+        Integer changedTimeId = createReservationTime(managerToken, futureTime);
         Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
 
@@ -175,8 +175,8 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     void updateScheduleByManager_already_canceled() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer changedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
-        Integer timeId = createReservationTime(startAt);
-        Integer changedTimeId = createReservationTime(LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
+        Integer timeId = createReservationTime(managerToken, startAt);
+        Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
 
@@ -201,8 +201,8 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     void updateScheduleByManager_duplicated() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer alreadyReservedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
-        Integer timeId = createReservationTime(startAt);
-        Integer alreadyReservedTimeId = createReservationTime(LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
+        Integer timeId = createReservationTime(managerToken, startAt);
+        Integer alreadyReservedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
         createReservationWithToken(managerToken, alreadyReservedDateId, alreadyReservedTimeId, themeId);
@@ -230,8 +230,8 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     void updateScheduleByManager_pastDateTime() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer pastSqlDateId = 1;
-        Integer timeId = createReservationTime(startAt);
-        Integer pastTimeId = createReservationTime("00:01");
+        Integer timeId = createReservationTime(managerToken, startAt);
+        Integer pastTimeId = createReservationTime(managerToken, "00:01");
         Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
 
