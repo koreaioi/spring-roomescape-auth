@@ -25,6 +25,7 @@ public class ReservationAdminController {
 
     private final ReservationService reservationService;
 
+    @AuthGuard(roles = MANAGER)
     @GetMapping("/reservations")
     public ResponseEntity<List<ReservationDetailDto>> getReservations() {
         List<ReservationDetailDto> responseData = reservationService.readAll().stream()
@@ -33,8 +34,8 @@ public class ReservationAdminController {
         return ResponseEntity.ok(responseData);
     }
 
+    @AuthGuard(roles = MANAGER)
     @PostMapping("/reservations")
-    @AuthGuard(roles = {MANAGER})
     public ResponseEntity<ReservationDetailDto> createReservation(
             @Valid @RequestBody ReservationSaveDto dto,
             @LoginMember Member manager
@@ -44,6 +45,7 @@ public class ReservationAdminController {
         return ResponseEntity.ok(responseData);
     }
 
+    @AuthGuard(roles = MANAGER)
     @PatchMapping("/reservations/{id}/cancel")
     public ResponseEntity<ReservationDetailDto> cancelReservation(@PathVariable Long id) {
         Reservation reservation = reservationService.cancelByManager(id);
@@ -51,6 +53,7 @@ public class ReservationAdminController {
         return ResponseEntity.ok(responseData);
     }
 
+    @AuthGuard(roles = MANAGER)
     @PatchMapping("/reservations/{id}/schedule")
     public ResponseEntity<ReservationDetailDto> updateSchedule(
             @PathVariable Long id,

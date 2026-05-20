@@ -16,7 +16,7 @@ VALUES ('테마1', '설명1', 'https://example.com/theme1.png', TRUE);
 
 INSERT INTO reservation (name, date_id, time_id, theme_id, status)
 VALUES (
-           '송송',
+           'member',
            SELECT id FROM reservation_date WHERE date = DATEADD('DAY', -1, CURRENT_DATE),
            SELECT id FROM reservation_time WHERE start_at = '09:00:00',
            SELECT id FROM theme WHERE name = '테마1',

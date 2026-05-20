@@ -1,40 +1,24 @@
 package roomescape.time.controller;
 
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.common.AcceptanceTest;
 
 import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.is;
 import static roomescape.date.fixture.ReservationDateApiFixture.createReservationDate;
-import static roomescape.reservation.fixture.ReservationApiFixture.createReservation;
+import static roomescape.reservation.fixture.ReservationApiFixture.createReservationWithToken;
 import static roomescape.theme.fixture.ThemeApiFixture.createTheme;
 import static roomescape.time.fixture.ReservationTimeApiFixture.createReservationTime;
 import static roomescape.time.fixture.ReservationTimeApiFixture.updateTimeStatus;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class ReservationTimeControllerTest {
+class ReservationTimeControllerTest extends AcceptanceTest {
 
     private static String startAt1 = "10:00:00";
     private static String startAt2 = "11:00:00";
     private static String themeName = "테마1";
-    private static String name = "브라운";
-
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
 
     @Test
     @DisplayName("사용자는 특정 날짜와 테마의 예약 가능한 시간을 조회한다.")
@@ -64,7 +48,7 @@ class ReservationTimeControllerTest {
         updateTimeStatus(timeId, true);
         updateTimeStatus(availableTimeId, true);
         Integer themeId = createTheme(themeName);
-        createReservation(name, dateId, timeId, themeId);
+        createReservationWithToken(memberToken, dateId, timeId, themeId);
 
         RestAssured.given().log().all()
                 .queryParam("dateId", dateId)

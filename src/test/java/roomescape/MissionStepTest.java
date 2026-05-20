@@ -2,14 +2,11 @@ package roomescape;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.common.AcceptanceTest;
 import roomescape.reservation.controller.ReservationAdminController;
 
 import java.lang.reflect.Field;
@@ -21,25 +18,15 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class MissionStepTest {
+class MissionStepTest extends AcceptanceTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
     @Test
     void 예약_조회() {
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
@@ -108,21 +95,22 @@ class MissionStepTest {
                 .statusCode(200);
 
         Map<String, Object> reservation = new HashMap<>();
-        String reservationName = "브라운";
-        reservation.put("name", reservationName);
+//        String reservationName = "브라운";
         reservation.put("dateId", 1);
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .body(reservation)
                 .when().post("/member/reservations")
                 .then().log().all()
                 .statusCode(200);
 
         RestAssured.given().log().all()
-                .when().get("/member/reservations/" + reservationName)
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
+                .when().get("/member/my-reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));

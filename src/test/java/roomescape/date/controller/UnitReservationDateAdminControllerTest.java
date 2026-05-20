@@ -7,9 +7,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.common.auth.jwt.JwtExtractor;
+import roomescape.common.auth.jwt.JwtValidator;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.service.ReservationDateService;
+import roomescape.member.repository.MemberRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,6 +31,15 @@ class UnitReservationDateAdminControllerTest {
 
     @MockitoBean
     private ReservationDateService reservationDateService;
+
+    @MockitoBean
+    private JwtValidator jwtValidator;
+
+    @MockitoBean
+    private JwtExtractor jwtExtractor;
+
+    @MockitoBean
+    private MemberRepository memberRepository;
 
     @Test
     @DisplayName("날짜를 정상적으로 등록하면, 등록한 날짜 정보를 반환한다.")

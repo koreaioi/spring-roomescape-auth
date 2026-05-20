@@ -31,39 +31,35 @@ public class ReservationFixture {
     }
 
     public static ReservationSaveCommand toCommand(
-            String name,
             ReservationDate date,
             ReservationTime time,
             Theme theme
     ) {
-        return new ReservationSaveCommand(name, date.getId(), time.getId(), theme.getId());
+        return new ReservationSaveCommand(date.getId(), time.getId(), theme.getId());
     }
 
     public static ReservationSaveCommand toCommand(
-            String name,
             ReservationDate date,
             Long timeId,
             Theme theme
     ) {
-        return new ReservationSaveCommand(name, date.getId(), timeId, theme.getId());
+        return new ReservationSaveCommand(date.getId(), timeId, theme.getId());
     }
 
     public static ReservationSaveDto toCommand(
-            String name,
             Long dateId,
             ReservationTime time,
             Theme theme
     ) {
-        return new ReservationSaveDto(name, dateId, time.getId(), theme.getId());
+        return new ReservationSaveDto(dateId, time.getId(), theme.getId());
     }
 
     public static ReservationSaveCommand toCommand(
-            String name,
             ReservationDate date,
             ReservationTime time,
             Long themeId
     ) {
-        return new ReservationSaveCommand(name, date.getId(), time.getId(), themeId);
+        return new ReservationSaveCommand(date.getId(), time.getId(), themeId);
     }
 
 }

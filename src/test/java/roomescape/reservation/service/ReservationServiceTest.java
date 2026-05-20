@@ -112,7 +112,7 @@ class ReservationServiceTest {
     void reserve() {
         //given & when
         List<Reservation> reservations = List.of();
-        reservationService.reserve(ReservationFixture.toCommand(name, reservationDate1, reservationTime1, theme1));
+        reservationService.reserve(name, ReservationFixture.toCommand(reservationDate1, reservationTime1, theme1));
 
         //then
         assertThat(reservationService.readAll())
@@ -124,10 +124,10 @@ class ReservationServiceTest {
     void reserve_does_not_exist_reservation_time() {
         // given
         Long wrongTimeId = Long.MIN_VALUE;
-        ReservationSaveCommand command = ReservationFixture.toCommand(name, reservationDate1, wrongTimeId, theme1);
+        ReservationSaveCommand command = ReservationFixture.toCommand(reservationDate1, wrongTimeId, theme1);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.reserve(command))
+        assertThatThrownBy(() -> reservationService.reserve(name, command))
                 .isInstanceOf(ReservationTimeException.class)
                 .hasMessage(TIME_NOT_FOUND.getMessage());
     }
@@ -138,10 +138,10 @@ class ReservationServiceTest {
     void reserve_does_not_exist_theme() {
         // given
         Long wrongThemeId = Long.MIN_VALUE;
-        ReservationSaveCommand command = toCommand(name, reservationDate1, reservationTime1, wrongThemeId);
+        ReservationSaveCommand command = toCommand(reservationDate1, reservationTime1, wrongThemeId);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.reserve(command))
+        assertThatThrownBy(() -> reservationService.reserve(name, command))
                 .isInstanceOf(ThemeException.class)
                 .hasMessage(THEME_NOT_FOUND.getMessage());
     }
@@ -151,12 +151,12 @@ class ReservationServiceTest {
     void reserved_duplicated() {
         // given
         Reservation reservation = reservation(name, reservationDate1, reservationTime1, theme1);
-        ReservationSaveCommand duplicated = ReservationFixture.toCommand(name, reservationDate1, reservationTime1, theme1);
+        ReservationSaveCommand duplicated = ReservationFixture.toCommand(reservationDate1, reservationTime1, theme1);
         System.out.println(reservationDate1.isActive());
         save(reservation);
 
         //  when & then
-        assertThatThrownBy(() -> reservationService.reserve(duplicated))
+        assertThatThrownBy(() -> reservationService.reserve(name, duplicated))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_BOOKED.getMessage());
     }
@@ -166,11 +166,11 @@ class ReservationServiceTest {
     void reserved_when_cancel_same_name() {
         // given
         Reservation reservation = save(reservation(name, reservationDate1, reservationTime1, theme1));
-        ReservationSaveCommand duplicated = ReservationFixture.toCommand(name, reservationDate1, reservationTime1, theme1);
+        ReservationSaveCommand duplicated = ReservationFixture.toCommand(reservationDate1, reservationTime1, theme1);
         cancelByManager(reservation);
 
         // when
-        Reservation actual = reservationService.reserve(duplicated);
+        Reservation actual = reservationService.reserve(name, duplicated);
 
         // then
         Assertions.assertThat(actual.getStatus())
@@ -183,11 +183,11 @@ class ReservationServiceTest {
         // given
         String anotherName = "다른사람";
         Reservation reservation = save(reservation(name, reservationDate1, reservationTime1, theme1));
-        ReservationSaveCommand duplicated = ReservationFixture.toCommand(anotherName, reservationDate1, reservationTime1, theme1);
+        ReservationSaveCommand duplicated = ReservationFixture.toCommand(reservationDate1, reservationTime1, theme1);
         cancelByManager(reservation);
 
         // when
-        Reservation actual = reservationService.reserve(duplicated);
+        Reservation actual = reservationService.reserve(anotherName, duplicated);
 
         // then
         Assertions.assertThat(actual.getStatus())
