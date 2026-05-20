@@ -3,6 +3,9 @@ package roomescape.member.domain;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.member.exception.MemberException;
+
+import static roomescape.member.exception.MemberExceptionInformation.PASSWORD_NOT_MATCH;
 
 class PasswordTest {
 
@@ -33,4 +36,19 @@ class PasswordTest {
         Assertions.assertThat(password.getValue())
                 .isEqualTo(samePassword.getValue());
     }
+
+    @Test
+    @DisplayName("비밀번호가 일치하지 않으면 예외가 발생한다.")
+    void validate_matches() {
+        // given
+        String rawPassword = "1234";
+        String wrongPassword = "abcd";
+        Password password = Password.from(rawPassword);
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> password.validateMatches(wrongPassword))
+                .isInstanceOf(MemberException.class)
+                .hasMessage(PASSWORD_NOT_MATCH.getMessage());
+    }
+
 }
