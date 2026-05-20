@@ -1,6 +1,6 @@
 package roomescape.member.controller.dto.request;
 
-import roomescape.common.validation.annotation.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import roomescape.member.service.dto.MemberSaveCommand;
 
 public record MemberSaveDto(
