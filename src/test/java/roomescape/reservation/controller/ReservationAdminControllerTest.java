@@ -45,7 +45,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     void create_reservation() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         createReservationWithToken(managerToken, dateId, timeId, themeId);
 
@@ -62,7 +62,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     void cancelByManager_reservation() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
 
@@ -84,7 +84,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     @DisplayName("dateId가 없으면 예약 생성에 실패한다.")
     void create_reservation_without_date_id() {
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", null);
@@ -105,7 +105,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     @DisplayName("timeId가 없으면 예약 생성에 실패한다.")
     void create_reservation_without_time_id() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", dateId);
@@ -152,7 +152,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer changedDateId = createReservationDate(managerToken, futureDate);
         Integer timeId = createReservationTime(startAt);
         Integer changedTimeId = createReservationTime(futureTime);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
 
         Map<String, Object> params = new HashMap<>();
@@ -177,7 +177,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer changedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
         Integer timeId = createReservationTime(startAt);
         Integer changedTimeId = createReservationTime(LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
 
         cancelReservationWithToken(this.managerToken, reservationId);
@@ -203,7 +203,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer alreadyReservedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
         Integer timeId = createReservationTime(startAt);
         Integer alreadyReservedTimeId = createReservationTime(LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
         createReservationWithToken(managerToken, alreadyReservedDateId, alreadyReservedTimeId, themeId);
 
@@ -232,7 +232,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer pastSqlDateId = 1;
         Integer timeId = createReservationTime(startAt);
         Integer pastTimeId = createReservationTime("00:01");
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
 
         Map<String, Object> params = new HashMap<>();

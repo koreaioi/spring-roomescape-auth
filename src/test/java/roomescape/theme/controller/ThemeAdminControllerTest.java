@@ -10,36 +10,23 @@ import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.http.HttpHeaders;
+import roomescape.common.AcceptanceTest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class ThemeAdminControllerTest {
+class ThemeAdminControllerTest extends AcceptanceTest {
 
     private final String themeName = "테마1";
     private final String themeDescription = "테마1 설명";
     private final String thumbnailUrl = "테마1 썸네일";
     private final String defaultThumbnailUrl = "DEFAULT_THUMBNAIL_URL";
 
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
     @Test
     @DisplayName("관리자는 테마 목록을 조회한다.")
     void get_themes() {
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/themes")
                 .then().log().all()
                 .statusCode(200)
@@ -49,9 +36,10 @@ class ThemeAdminControllerTest {
     @Test
     @DisplayName("관리자는 테마를 생성한다.")
     void create_theme() {
-        createTheme(themeName);
+        createTheme(managerToken, themeName);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/themes")
                 .then().log().all()
                 .statusCode(200)
@@ -61,12 +49,13 @@ class ThemeAdminControllerTest {
     @Test
     @DisplayName("관리자는 테마 활성화 상태를 변경한다.")
     void update_theme_status() {
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         Map<String, Boolean> params = new HashMap<>();
         params.put("isActive", true);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().patch("/admin/themes/" + themeId)
@@ -85,6 +74,7 @@ class ThemeAdminControllerTest {
         params.put("thumbnailUrl", thumbnailUrl);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/themes")
@@ -102,6 +92,7 @@ class ThemeAdminControllerTest {
         params.put("thumbnailUrl", thumbnailUrl);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/themes")
@@ -119,6 +110,7 @@ class ThemeAdminControllerTest {
         params.put("thumbnailUrl", null);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/themes")
@@ -136,6 +128,7 @@ class ThemeAdminControllerTest {
         params.put("thumbnailUrl", "");
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/themes")

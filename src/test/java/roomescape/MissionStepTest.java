@@ -79,6 +79,7 @@ class MissionStepTest extends AcceptanceTest {
         theme.put("description", "테마1 설명");
         theme.put("thumbnailUrl", "테마1 썸네일");
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(theme)
                 .when().post("/admin/themes")
@@ -96,7 +97,6 @@ class MissionStepTest extends AcceptanceTest {
                 .statusCode(200);
 
         Map<String, Object> reservation = new HashMap<>();
-//        String reservationName = "브라운";
         reservation.put("dateId", 1);
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);

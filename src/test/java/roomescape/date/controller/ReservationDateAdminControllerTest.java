@@ -140,7 +140,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
     void shouldThrowException_WhenDeleteDate_AboutAlreadyReserved() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime("10:00");
-        Integer themeId = createTheme("테마1");
+        Integer themeId = createTheme(managerToken, "테마1");
 
         createReservationWithToken(managerToken, dateId, timeId, themeId);
 

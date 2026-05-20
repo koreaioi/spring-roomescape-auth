@@ -2,6 +2,7 @@ package roomescape.theme.fixture;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.springframework.http.HttpHeaders;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,13 +15,14 @@ public class ThemeApiFixture {
     private ThemeApiFixture() {
     }
 
-    public static Integer createTheme(String name) {
+    public static Integer createTheme(String token, String name) {
         Map<String, Object> params = new HashMap<>();
         params.put("name", name);
         params.put("description", THEME_DESCRIPTION);
         params.put("thumbnailUrl", THUMBNAIL_URL);
 
         return RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, token)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/themes")
@@ -30,11 +32,12 @@ public class ThemeApiFixture {
                 .path("id");
     }
 
-    public static void updateThemeStatus(Integer themeId, boolean isActive) {
+    public static void updateThemeStatus(String token, Integer themeId, boolean isActive) {
         Map<String, Object> updateActive = new HashMap<>();
         updateActive.put("isActive", isActive);
 
         RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, token)
                 .contentType(ContentType.JSON)
                 .body(updateActive)
                 .when().patch("/admin/themes/" + themeId)

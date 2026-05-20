@@ -45,7 +45,7 @@ class ReservationControllerTest extends AcceptanceTest {
     void create_reservation() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
         createReservationWithToken(memberToken, dateId, timeId, themeId);
 
         RestAssured.given().log().all()
@@ -60,7 +60,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("사용자는 자신의 이름으로 예약 목록을 조회한다.")
     void get_my_reservations() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         Integer timeId = createReservationTime(startAt);
         Integer otherTimeId = createReservationTime(otherStartAt);
@@ -98,7 +98,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("dateId가 없으면 예약 생성에 실패한다.")
     void create_reservation_without_date_id() {
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", null);
@@ -119,7 +119,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @DisplayName("timeId가 없으면 예약 생성에 실패한다.")
     void create_reservation_without_time_id() {
         Integer dateId = createReservationDate(managerToken, date);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", dateId);
@@ -162,7 +162,7 @@ class ReservationControllerTest extends AcceptanceTest {
     void reserved_duplicated() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         createReservationWithToken(memberToken, dateId, timeId, themeId);
 
@@ -186,7 +186,7 @@ class ReservationControllerTest extends AcceptanceTest {
     void reserved_when_canceled_same_name() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
         cancelReservationWithToken(memberToken, reservationId);
@@ -210,7 +210,7 @@ class ReservationControllerTest extends AcceptanceTest {
     void reserved_when_canceled_another_name() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
         cancelReservationWithToken(memberToken, reservationId);
@@ -234,7 +234,7 @@ class ReservationControllerTest extends AcceptanceTest {
     void cancel() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
 
@@ -254,7 +254,7 @@ class ReservationControllerTest extends AcceptanceTest {
     void cancel_not_owner() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
 
@@ -272,7 +272,7 @@ class ReservationControllerTest extends AcceptanceTest {
     void cancel_already_canceled() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
         cancelReservationWithToken(memberToken, reservationId);
@@ -313,7 +313,7 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer changedDateId = createReservationDate(managerToken, futureDate);
         Integer timeId = createReservationTime(startAt);
         Integer changedTimeId = createReservationTime(futureTime);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
 
         Map<String, Object> params = new HashMap<>();
@@ -338,7 +338,7 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer changedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
         Integer timeId = createReservationTime(startAt);
         Integer changedTimeId = createReservationTime(LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
 
         Map<String, Object> params = new HashMap<>();
@@ -362,7 +362,7 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer changedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
         Integer timeId = createReservationTime(startAt);
         Integer changedTimeId = createReservationTime(LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
         cancelReservationWithToken(memberToken, reservationId);
 
@@ -417,7 +417,7 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer pastDateId = 1;
         Integer timeId = createReservationTime(startAt);
         Integer changedTimeId = createReservationTime(LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
         Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
 
         Map<String, Object> params = new HashMap<>();
@@ -439,7 +439,7 @@ class ReservationControllerTest extends AcceptanceTest {
     void create_reservation_with_inactive_date() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
         updateDateStatus(managerToken, dateId, false);
 
         Map<String, Object> params = new HashMap<>();
@@ -462,7 +462,7 @@ class ReservationControllerTest extends AcceptanceTest {
     void create_reservation_with_inactive_time() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
         updateTimeStatus(timeId, false);
 
         Map<String, Object> params = new HashMap<>();
@@ -485,8 +485,8 @@ class ReservationControllerTest extends AcceptanceTest {
     void create_reservation_with_inactive_theme() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(startAt);
-        Integer themeId = createTheme(themeName);
-        updateThemeStatus(themeId, false);
+        Integer themeId = createTheme(managerToken, themeName);
+        updateThemeStatus(managerToken, themeId, false);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", dateId);

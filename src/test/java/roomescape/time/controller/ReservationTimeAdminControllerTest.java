@@ -84,7 +84,7 @@ class ReservationTimeAdminControllerTest extends AcceptanceTest {
     void shouldThrowException_WhenDeleteDate_AboutAlreadyReserved() {
         Integer dateId = createReservationDate(managerToken, LocalDate.of(2099, 1, 1).toString());
         Integer timeId = createReservationTime("10:00");
-        Integer themeId = createTheme("테마1");
+        Integer themeId = createTheme(managerToken, "테마1");
         createReservationWithToken(managerToken, dateId, timeId, themeId);
 
         Map<String, Object> updateParams = new HashMap<>();

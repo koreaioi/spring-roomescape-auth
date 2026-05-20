@@ -26,7 +26,7 @@ class ReservationTimeControllerTest extends AcceptanceTest {
         Integer dateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
         Integer timeId = createReservationTime(startAt1);
         updateTimeStatus(timeId, true);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         RestAssured.given().log().all()
                 .queryParam("dateId", dateId)
@@ -47,7 +47,7 @@ class ReservationTimeControllerTest extends AcceptanceTest {
         Integer availableTimeId = createReservationTime(startAt2);
         updateTimeStatus(timeId, true);
         updateTimeStatus(availableTimeId, true);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
         createReservationWithToken(memberToken, dateId, timeId, themeId);
 
         RestAssured.given().log().all()
@@ -69,7 +69,7 @@ class ReservationTimeControllerTest extends AcceptanceTest {
         Integer inactiveTimeId = createReservationTime(startAt2);
         updateTimeStatus(activeTimeId, true);
         updateTimeStatus(inactiveTimeId, false);
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         RestAssured.given().log().all()
                 .queryParam("dateId", dateId)
@@ -84,7 +84,7 @@ class ReservationTimeControllerTest extends AcceptanceTest {
     @DisplayName("예약 시간이 없으면 빈 목록을 반환한다.")
     void readAvailableTimesEmpty() {
         Integer dateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
-        Integer themeId = createTheme(themeName);
+        Integer themeId = createTheme(managerToken, themeName);
 
         RestAssured.given().log().all()
                 .queryParam("dateId", dateId)
