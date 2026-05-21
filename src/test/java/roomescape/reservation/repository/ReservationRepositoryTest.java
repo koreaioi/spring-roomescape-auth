@@ -17,10 +17,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.repository.JdbcReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.store.domain.Store;
+import roomescape.store.repository.JdbcStoreRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -28,6 +31,7 @@ import roomescape.time.fixture.ReservationTimeFixture;
 import roomescape.time.repository.JdbcReservationTimeRepository;
 
 @JdbcTest
+@Sql({"/truncate.sql", "/test-store.sql"})
 class ReservationRepositoryTest {
 
     private final String name = "한다";
@@ -38,11 +42,13 @@ class ReservationRepositoryTest {
     private ReservationTime reservationTime1;
     private ReservationTime reservationTime2;
     private Theme theme;
+    private Store store;
 
     private JdbcReservationRepository jdbcReservationRepository;
     private JdbcReservationTimeRepository jdbcReservationTimeRepository;
     private JdbcReservationDateRepository jdbcReservationDateRepository;
     private JdbcThemeRepository jdbcThemeRepository;
+    private JdbcStoreRepository jdbcStoreRepository;
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
@@ -53,6 +59,7 @@ class ReservationRepositoryTest {
         jdbcReservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
         jdbcReservationDateRepository = new JdbcReservationDateRepository(jdbcTemplate);
         jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
+        jdbcStoreRepository = new JdbcStoreRepository(jdbcTemplate);
 
         ReservationTime time1 = jdbcReservationTimeRepository.save(ReservationTimeFixture.time15());
         ReservationTime time2 = jdbcReservationTimeRepository.save(ReservationTimeFixture.time16());
@@ -62,13 +69,14 @@ class ReservationRepositoryTest {
         reservationDate1 = jdbcReservationDateRepository.save(ReservationDate.create(date1));
         reservationDate2 = jdbcReservationDateRepository.save(ReservationDate.create(date2));
         theme = jdbcThemeRepository.save(Theme.create("테마", "설명", "썸네일"));
+        store = jdbcStoreRepository.findAll().get(0);
     }
 
     @Test
     @DisplayName("예약 정보를 단건 조회한다.")
     void findById() {
         // given
-        Reservation saved = save(Reservation.create(name, reservationDate1, reservationTime1, theme));
+        Reservation saved = save(Reservation.create(name, reservationDate1, reservationTime1, theme, store));
 
         // when
         Reservation actual = jdbcReservationRepository.findById(saved.getId()).get();
@@ -98,8 +106,8 @@ class ReservationRepositoryTest {
     void findAll() {
         // given
         List<Reservation> reservations = List.of(
-                Reservation.create(name, reservationDate1, reservationTime1, theme),
-                Reservation.create(name, reservationDate1, reservationTime2, theme)
+                Reservation.create(name, reservationDate1, reservationTime1, theme, store),
+                Reservation.create(name, reservationDate1, reservationTime2, theme, store)
         );
         saveAll(reservations);
 
@@ -116,10 +124,10 @@ class ReservationRepositoryTest {
     void findAllByName() {
         // given
         List<Reservation> reservations = saveAll(List.of(
-                Reservation.create(name, reservationDate1, reservationTime1, theme),
-                Reservation.create(name, reservationDate1, reservationTime2, theme),
-                Reservation.create(name, reservationDate2, reservationTime1, theme),
-                Reservation.create(name, reservationDate2, reservationTime2, theme))
+                Reservation.create(name, reservationDate1, reservationTime1, theme, store),
+                Reservation.create(name, reservationDate1, reservationTime2, theme, store),
+                Reservation.create(name, reservationDate2, reservationTime1, theme, store),
+                Reservation.create(name, reservationDate2, reservationTime2, theme, store))
         );
         reservations.sort(
                 Comparator.comparing((Reservation reservation) -> reservation.getDate().getDate(), Comparator.reverseOrder())
@@ -142,7 +150,7 @@ class ReservationRepositoryTest {
         List<Reservation> emptyReservations = List.of();
 
         // when
-        jdbcReservationRepository.save(reservation(name, reservationDate1, reservationTime1, theme));
+        jdbcReservationRepository.save(reservation(name, reservationDate1, reservationTime1, theme, store));
 
         // then
         assertThat(jdbcReservationRepository.findAll())
@@ -153,7 +161,7 @@ class ReservationRepositoryTest {
     @DisplayName("예약 날짜와 시간 ID 정보로 존재하는지 확인한다.")
     void exitsByDateAndTimeId() {
         // given
-        save(reservation(name, reservationDate1, reservationTime1, theme));
+        save(reservation(name, reservationDate1, reservationTime1, theme, store));
         Long wrongDateId = reservationDate2.getId();
 
         // when & then
@@ -167,7 +175,7 @@ class ReservationRepositoryTest {
     @DisplayName("예약을 취소하면 상태가 CANCELED가 된다.")
     void updateState_canceled() {
         // given
-        Reservation canceledReservation = save(canceledReservation(name, reservationDate1, reservationTime1, theme));
+        Reservation canceledReservation = save(canceledReservation(name, reservationDate1, reservationTime1, theme, store));
         updateStatus(canceledReservation);
 
         // when
@@ -182,7 +190,7 @@ class ReservationRepositoryTest {
     @DisplayName("이용가능한 날짜/시간으로 예약을 변경할 수 있다.")
     void updateSchedule() {
         // given
-        Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme));
+        Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme, store));
         saved.changeSchedule(name, reservationDate2, reservationTime1);
 
         // when

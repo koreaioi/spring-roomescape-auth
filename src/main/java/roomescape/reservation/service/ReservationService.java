@@ -6,11 +6,15 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.repository.ReservationDateRepository;
+import roomescape.store.domain.ManagedStore;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
+import roomescape.store.domain.Store;
+import roomescape.store.exception.StoreException;
+import roomescape.store.repository.StoreRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeException;
 import roomescape.theme.repository.ThemeRepository;
@@ -24,6 +28,7 @@ import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
 import static roomescape.reservation.exception.ReservaitonErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservaitonErrorInformation.RESERVATION_NOT_FOUND;
+import static roomescape.store.exception.StoreErrorInformation.STORE_NOT_FOUND;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
 import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
 
@@ -36,6 +41,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationDateRepository reservationDateRepository;
     private final ThemeRepository themeRepository;
+    private final StoreRepository storeRepository;
 
     public List<Reservation> readAll() {
         return reservationRepository.findAll();
@@ -56,15 +62,19 @@ public class ReservationService {
         Theme theme = getTheme(command.themeId());
         theme.validateIsInactive();
 
+        Store store = getStore(command.storeId());
+
         validateNotAlreadyBookedByOthers(reservationDate.getId(), reservationTime.getId(), theme.getId());
         return reservationRepository.save(
-                Reservation.create(name, reservationDate, reservationTime, theme)
+                Reservation.create(name, reservationDate, reservationTime, theme, store)
         );
     }
 
     @Transactional
-    public Reservation cancelByManager(Long id) {
+    public Reservation cancelByManager(Long id, ManagedStore managedStore) {
         Reservation reservation = getReservation(id);
+        validateManagedStore(managedStore, reservation);
+
         reservation.updateStatus(CANCELED);
         reservationRepository.updateStatus(reservation);
         return reservation;
@@ -95,8 +105,10 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation changeScheduleByManager(ReservationChangeCommand command) {
+    public Reservation changeScheduleByManager(ReservationChangeCommand command, ManagedStore managedStore) {
         Reservation reservation = getReservation(command.id());
+        validateManagedStore(managedStore, reservation);
+
         ReservationTime newTime = getReservationTime(command.timeId());
         newTime.validateIsInactive();
 
@@ -130,10 +142,20 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
     }
 
+    private Store getStore(Long storeId) {
+        return storeRepository.findById(storeId)
+                .orElseThrow(() -> new StoreException(STORE_NOT_FOUND));
+    }
+
     private void validateNotAlreadyBookedByOthers(Long dateId, Long timeId, Long themeId) {
         if (reservationRepository.existsByDateAndTimeAndThemeId(dateId, timeId, themeId)) {
             throw new ReservationException(RESERVATION_ALREADY_BOOKED);
         }
+    }
+
+    private void validateManagedStore(ManagedStore managedStore, Reservation reservation) {
+        Store store = reservation.getStore();
+        managedStore.validateCanManage(store);
     }
 
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.store.domain.Store;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -40,6 +41,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     resultSet.getString("thumbnail_url"),
                     resultSet.getBoolean("is_active")
             ),
+            Store.load(
+                    resultSet.getLong("store_id"),
+                    resultSet.getString("store_name")
+            ),
             ReservationStatus.valueOf(resultSet.getString("status"))
     );
 
@@ -67,11 +72,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                     th.name AS theme_name,
                     th.description,
                     th.thumbnail_url,
-                    th.is_active
+                    th.is_active,
+                    s.id AS store_id,
+                    s.name AS store_name
                 FROM reservation r
                 INNER JOIN reservation_date d ON r.date_id = d.id
                 INNER JOIN reservation_time t ON r.time_id = t.id
                 INNER JOIN theme th ON r.theme_id = th.id
+                INNER JOIN store s ON r.store_id = s.id
                 """;
 
         return jdbcTemplate.query(sql, reservationRowMapper);
@@ -94,11 +102,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                     th.name AS theme_name,
                     th.description,
                     th.thumbnail_url,
-                    th.is_active
+                    th.is_active,
+                    s.id AS store_id,
+                    s.name AS store_name
                 FROM reservation r
                 INNER JOIN reservation_date d ON r.date_id = d.id
                 INNER JOIN reservation_time t ON r.time_id = t.id
                 INNER JOIN theme th ON r.theme_id = th.id
+                INNER JOIN store s ON r.store_id = s.id
                 WHERE r.id = :id
                 """;
         SqlParameterSource params = new MapSqlParameterSource("id", id);
@@ -126,11 +137,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                     th.name AS theme_name,
                     th.description,
                     th.thumbnail_url,
-                    th.is_active
+                    th.is_active,
+                    s.id AS store_id,
+                    s.name AS store_name
                 FROM reservation r
                 INNER JOIN reservation_date d ON r.date_id = d.id
                 INNER JOIN reservation_time t ON r.time_id = t.id
                 INNER JOIN theme th ON r.theme_id = th.id
+                INNER JOIN store s ON r.store_id = s.id
                 WHERE r.name = :name
                 ORDER BY d.date DESC , t.start_at ASC
                 """;
@@ -147,6 +161,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("date_id", reservation.getDate().getId())
                 .addValue("time_id", reservation.getTime().getId())
                 .addValue("theme_id", reservation.getTheme().getId())
+                .addValue("store_id", reservation.getStore().getId())
                 .addValue("status", reservation.getStatus().name());
         Long savedId = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return Reservation.load(
@@ -155,6 +170,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme(),
+                reservation.getStore(),
                 reservation.getStatus()
         );
     }

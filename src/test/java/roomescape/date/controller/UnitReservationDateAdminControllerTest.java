@@ -15,6 +15,7 @@ import roomescape.common.auth.jwt.JwtValidator;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.service.ReservationDateService;
+import roomescape.management.repository.ManagementRepository;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 
@@ -48,6 +49,9 @@ class UnitReservationDateAdminControllerTest {
 
     @MockitoBean
     private MemberRepository memberRepository;
+
+    @MockitoBean
+    private ManagementRepository managementRepository;
 
     private String managerToken;
 

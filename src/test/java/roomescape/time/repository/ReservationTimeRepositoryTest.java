@@ -15,10 +15,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
 import roomescape.date.repository.JdbcReservationDateRepository;
 import roomescape.reservation.repository.JdbcReservationRepository;
+import roomescape.store.domain.Store;
+import roomescape.store.repository.JdbcStoreRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.fixture.ThemeFixture;
 import roomescape.theme.repository.JdbcThemeRepository;
@@ -26,15 +29,19 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.fixture.ReservationTimeFixture;
 
 @JdbcTest
+@Sql({"/truncate.sql", "/test-store.sql"})
 class ReservationTimeRepositoryTest {
 
     private JdbcReservationTimeRepository jdbcReservationTimeRepository;
     private JdbcReservationDateRepository jdbcReservationDateRepository;
     private JdbcThemeRepository jdbcThemeRepository;
     private JdbcReservationRepository jdbcReservationRepository;
+    private JdbcStoreRepository jdbcStoreRepository;
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
+
+    private Store store;
 
     @BeforeEach
     void setup() {
@@ -42,6 +49,9 @@ class ReservationTimeRepositoryTest {
         jdbcReservationDateRepository = new JdbcReservationDateRepository(jdbcTemplate);
         jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
         jdbcReservationRepository = new JdbcReservationRepository(jdbcTemplate);
+        jdbcStoreRepository = new JdbcStoreRepository(jdbcTemplate);
+
+        store = jdbcStoreRepository.findAll().get(0);
     }
 
     @Test
@@ -169,7 +179,7 @@ class ReservationTimeRepositoryTest {
     }
 
     private void saveReservation(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
-        jdbcReservationRepository.save(reservation("송송", reservationDate, reservationTime, theme));
+        jdbcReservationRepository.save(reservation("송송", reservationDate, reservationTime, theme, store));
     }
 
     private boolean updateStatus(ReservationTime saved) {

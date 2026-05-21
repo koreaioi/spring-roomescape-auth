@@ -142,7 +142,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, "10:00");
         Integer themeId = createTheme(managerToken, "테마1");
 
-        createReservationWithToken(managerToken, dateId, timeId, themeId);
+        createReservationWithToken(managerToken, dateId, timeId, themeId, 1);
 
         Map<String, Object> updateParams = new HashMap<>();
         updateParams.put("isActive", false);

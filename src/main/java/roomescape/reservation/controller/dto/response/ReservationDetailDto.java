@@ -14,6 +14,8 @@ public record ReservationDetailDto(
         Long themeId,
         String themeName,
         String themeThumbnailUrl,
+        Long storeId,
+        String storeName,
         ReservationStatus status
 ) {
 
@@ -26,6 +28,8 @@ public record ReservationDetailDto(
                 reservation.getTheme().getId(),
                 reservation.getTheme().getName(),
                 reservation.getTheme().getThumbnailUrl(),
+                reservation.getStore().getId(),
+                reservation.getStore().getName(),
                 reservation.getStatus()
         );
     }

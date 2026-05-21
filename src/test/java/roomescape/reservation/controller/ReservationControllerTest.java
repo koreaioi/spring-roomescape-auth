@@ -46,7 +46,7 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
-        createReservationWithToken(memberToken, dateId, timeId, themeId);
+        createReservationWithToken(memberToken, dateId, timeId, themeId, 1);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
@@ -65,8 +65,8 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer otherTimeId = createReservationTime(managerToken, otherStartAt);
 
-        createReservationWithToken(memberToken, dateId, timeId, themeId);
-        createReservationWithToken(anotherToken, dateId, otherTimeId, themeId);
+        createReservationWithToken(memberToken, dateId, timeId, themeId, 1);
+        createReservationWithToken(anotherToken, dateId, otherTimeId, themeId, 1);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
@@ -104,6 +104,7 @@ class ReservationControllerTest extends AcceptanceTest {
         params.put("dateId", null);
         params.put("timeId", timeId);
         params.put("themeId", themeId);
+        params.put("storeId", 1);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
@@ -125,6 +126,7 @@ class ReservationControllerTest extends AcceptanceTest {
         params.put("dateId", dateId);
         params.put("timeId", null);
         params.put("themeId", themeId);
+        params.put("storeId", 1);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
@@ -146,6 +148,7 @@ class ReservationControllerTest extends AcceptanceTest {
         params.put("dateId", dateId);
         params.put("timeId", timeId);
         params.put("themeId", null);
+        params.put("storeId", 1);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
@@ -164,12 +167,13 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
-        createReservationWithToken(memberToken, dateId, timeId, themeId);
+        createReservationWithToken(memberToken, dateId, timeId, themeId, 1);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", dateId);
         params.put("timeId", timeId);
         params.put("themeId", themeId);
+        params.put("storeId", 1);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
@@ -188,13 +192,14 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
-        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId, 1);
         cancelReservationWithToken(memberToken, reservationId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", dateId);
         params.put("timeId", timeId);
         params.put("themeId", themeId);
+        params.put("storeId", 1);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
@@ -212,13 +217,14 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
-        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId, 1);
         cancelReservationWithToken(memberToken, reservationId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", dateId);
         params.put("timeId", timeId);
         params.put("themeId", themeId);
+        params.put("storeId", 1);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, anotherToken)
@@ -236,7 +242,7 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
-        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId, 1);
 
         Map<String, String> params = new HashMap<>();
         RestAssured.given().log().all()
@@ -256,7 +262,7 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
-        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId, 1);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, anotherToken)
@@ -274,7 +280,7 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
-        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId, 1);
         cancelReservationWithToken(memberToken, reservationId);
 
         RestAssured.given().log().all()
@@ -289,7 +295,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("이미 지난 예약을 취소하면 예외가 발생한다.")
     @Sql(
-            scripts = {"classpath:truncate.sql", "classpath:test-member.sql", "classpath:past-reservation.sql"},
+            scripts = {"classpath:truncate.sql", "classpath:test-member.sql", "classpath:test-store.sql", "classpath:test-management.sql", "classpath:past-reservation.sql"},
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     void cancel_not_past() {
@@ -314,7 +320,7 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer changedTimeId = createReservationTime(managerToken, futureTime);
         Integer themeId = createTheme(managerToken, themeName);
-        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId, 1);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", changedDateId);
@@ -339,7 +345,7 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
-        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId, 1);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", changedDateId);
@@ -363,7 +369,7 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
-        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId, 1);
         cancelReservationWithToken(memberToken, reservationId);
 
         Map<String, Object> params = new HashMap<>();
@@ -383,7 +389,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("이미 지난 예약을 변경하면 예외가 발생한다.")
     @Sql(
-            scripts = {"classpath:truncate.sql", "classpath:test-member.sql", "classpath:past-reservation.sql"},
+            scripts = {"classpath:truncate.sql", "classpath:test-member.sql", "classpath:test-store.sql", "classpath:test-management.sql", "classpath:past-reservation.sql"},
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     void changeSchedule_past() {
@@ -409,7 +415,7 @@ class ReservationControllerTest extends AcceptanceTest {
     @Test
     @DisplayName("지난 날짜/시간으로 예약을 변경하면 예외가 발생한다.")
     @Sql(
-            scripts = {"classpath:truncate.sql", "classpath:test-member.sql", "classpath:past-reservation-date.sql"},
+            scripts = {"classpath:truncate.sql", "classpath:test-member.sql", "classpath:test-store.sql", "classpath:test-management.sql", "classpath:past-reservation-date.sql"},
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     void changeSchedule_new_datetime_is_past() {
@@ -418,7 +424,7 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
-        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(memberToken, dateId, timeId, themeId, 1);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", pastDateId);
@@ -446,6 +452,7 @@ class ReservationControllerTest extends AcceptanceTest {
         params.put("dateId", dateId);
         params.put("timeId", timeId);
         params.put("themeId", themeId);
+        params.put("storeId", 1);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
@@ -469,6 +476,7 @@ class ReservationControllerTest extends AcceptanceTest {
         params.put("dateId", dateId);
         params.put("timeId", timeId);
         params.put("themeId", themeId);
+        params.put("storeId", 1);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
@@ -492,6 +500,7 @@ class ReservationControllerTest extends AcceptanceTest {
         params.put("dateId", dateId);
         params.put("timeId", timeId);
         params.put("themeId", themeId);
+        params.put("storeId", 1);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)

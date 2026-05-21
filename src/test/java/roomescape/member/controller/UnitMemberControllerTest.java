@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.common.auth.jwt.JwtExtractor;
 import roomescape.common.auth.jwt.JwtProvider;
 import roomescape.common.auth.jwt.JwtValidator;
+import roomescape.management.repository.ManagementRepository;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberService;
 
@@ -38,6 +39,9 @@ class UnitMemberControllerTest {
 
     @MockitoBean
     private MemberRepository memberRepository;
+
+    @MockitoBean
+    private ManagementRepository managementRepository;
 
     @Test
     @DisplayName("회원가입 시, name을 누락하면 예외가 발생한다.")

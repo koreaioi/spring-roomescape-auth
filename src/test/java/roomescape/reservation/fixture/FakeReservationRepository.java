@@ -33,7 +33,7 @@ public class FakeReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         Long id = idGenerator.getAndIncrement();
         Reservation saved = Reservation.load(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
-                reservation.getTheme(), reservation.getStatus());
+                reservation.getTheme(), reservation.getStore(), reservation.getStatus());
         store.put(id, saved);
         return saved;
     }

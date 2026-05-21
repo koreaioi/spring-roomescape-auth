@@ -13,11 +13,12 @@ public class ReservationApiFixture {
     private ReservationApiFixture() {
     }
 
-    public static Integer createReservationWithToken(String token, Integer dateId, Integer timeId, Integer themeId) {
+    public static Integer createReservationWithToken(String token, Integer dateId, Integer timeId, Integer themeId, Integer storeId) {
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", dateId);
         params.put("timeId", timeId);
         params.put("themeId", themeId);
+        params.put("storeId", storeId);
 
         RequestSpecification request = RestAssured.given().log().all()
                 .contentType(ContentType.JSON);

@@ -12,7 +12,7 @@ import roomescape.member.domain.Role;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@Sql(scripts = {"classpath:truncate.sql", "classpath:test-member.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {"classpath:truncate.sql", "classpath:test-member.sql", "classpath:test-store.sql", "classpath:test-management.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public abstract class AcceptanceTest {
 
     @LocalServerPort

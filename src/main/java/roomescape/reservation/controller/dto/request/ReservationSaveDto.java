@@ -12,12 +12,15 @@ public record ReservationSaveDto(
         Long timeId,
 
         @NotNull(message = "themeId는 필수 입력값입니다.")
-        Long themeId
+        Long themeId,
+
+        @NotNull(message = "storeId는 필수 입력값입니다.")
+        Long storeId
 
 ) {
 
     public ReservationSaveCommand toCommand() {
-        return new ReservationSaveCommand(dateId, timeId, themeId);
+        return new ReservationSaveCommand(dateId, timeId, themeId, storeId);
     }
 
 }

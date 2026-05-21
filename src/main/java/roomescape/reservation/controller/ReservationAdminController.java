@@ -7,6 +7,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import roomescape.common.auth.annotation.AuthGuard;
 import roomescape.common.auth.annotation.LoginMember;
+import roomescape.common.auth.annotation.CurrentManagedStore;
+import roomescape.store.domain.ManagedStore;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.request.ReservationChangeScheduleDto;
 import roomescape.reservation.controller.dto.request.ReservationSaveDto;
@@ -38,17 +40,21 @@ public class ReservationAdminController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationDetailDto> createReservation(
             @Valid @RequestBody ReservationSaveDto dto,
-            @LoginMember Member manager
+            @LoginMember Member manager,
+            @CurrentManagedStore ManagedStore managedStore
     ) {
-        Reservation reservation = reservationService.reserve(manager.getName(), dto.toCommand());
+        Reservation reservation = reservationService.reserveByManager(manager.getName(), dto.toCommand(), managedStore);
         ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
         return ResponseEntity.ok(responseData);
     }
 
     @AuthGuard(roles = MANAGER)
     @PatchMapping("/reservations/{id}/cancel")
-    public ResponseEntity<ReservationDetailDto> cancelReservation(@PathVariable Long id) {
-        Reservation reservation = reservationService.cancelByManager(id);
+    public ResponseEntity<ReservationDetailDto> cancelReservation(
+            @PathVariable Long id,
+            @CurrentManagedStore ManagedStore managedStore
+    ) {
+        Reservation reservation = reservationService.cancelByManager(id, managedStore);
         ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
         return ResponseEntity.ok(responseData);
     }
@@ -57,9 +63,10 @@ public class ReservationAdminController {
     @PatchMapping("/reservations/{id}/schedule")
     public ResponseEntity<ReservationDetailDto> updateSchedule(
             @PathVariable Long id,
-            @Validated @RequestBody ReservationChangeScheduleDto dto
+            @Validated @RequestBody ReservationChangeScheduleDto dto,
+            @CurrentManagedStore ManagedStore managedStore
     ) {
-        Reservation reservation = reservationService.changeScheduleByManager(dto.toCommand(id));
+        Reservation reservation = reservationService.changeScheduleByManager(dto.toCommand(id), managedStore);
         ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
         return ResponseEntity.ok(responseData);
     }

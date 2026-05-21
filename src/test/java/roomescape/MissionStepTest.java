@@ -103,6 +103,7 @@ class MissionStepTest extends AcceptanceTest {
         reservation.put("dateId", 1);
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
+        reservation.put("storeId", 1);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

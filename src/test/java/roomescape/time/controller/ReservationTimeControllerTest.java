@@ -48,7 +48,7 @@ class ReservationTimeControllerTest extends AcceptanceTest {
         updateTimeStatus(managerToken, timeId, true);
         updateTimeStatus(managerToken, availableTimeId, true);
         Integer themeId = createTheme(managerToken, themeName);
-        createReservationWithToken(memberToken, dateId, timeId, themeId);
+        createReservationWithToken(memberToken, dateId, timeId, themeId, 1);
 
         RestAssured.given().log().all()
                 .queryParam("dateId", dateId)

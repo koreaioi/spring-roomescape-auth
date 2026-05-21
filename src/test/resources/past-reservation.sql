@@ -3,6 +3,8 @@ TRUNCATE TABLE reservation RESTART IDENTITY;
 TRUNCATE TABLE reservation_time RESTART IDENTITY;
 TRUNCATE TABLE reservation_date RESTART IDENTITY;
 TRUNCATE TABLE theme RESTART IDENTITY;
+TRUNCATE TABLE store RESTART IDENTITY;
+TRUNCATE TABLE management RESTART IDENTITY;
 SET REFERENTIAL_INTEGRITY TRUE;
 
 INSERT INTO reservation_date (date, is_active)
@@ -14,11 +16,15 @@ VALUES ('09:00:00', TRUE);
 INSERT INTO theme (name, description, thumbnail_url, is_active)
 VALUES ('테마1', '설명1', 'https://example.com/theme1.png', TRUE);
 
-INSERT INTO reservation (name, date_id, time_id, theme_id, status)
+INSERT INTO store (name) VALUES ('잠실점');
+INSERT INTO store (name) VALUES ('홍대점');
+
+INSERT INTO reservation (name, date_id, time_id, theme_id, store_id, status)
 VALUES (
            'member',
            SELECT id FROM reservation_date WHERE date = DATEADD('DAY', -1, CURRENT_DATE),
            SELECT id FROM reservation_time WHERE start_at = '09:00:00',
            SELECT id FROM theme WHERE name = '테마1',
+            1,
            'RESERVED'
        );
