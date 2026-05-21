@@ -21,30 +21,6 @@ const ERROR_MESSAGES = {
     "RES_010": "이미 지난 예약은 변경하거나 취소할 수 없습니다.",
     "RES_011": "과거 날짜나 시간으로는 예약할 수 없습니다.",
     "RES_012": "과거 날짜나 시간으로 일정을 변경할 수 없습니다.",
-
-    // Reservation Date
-    "RES_DATE_001": "날짜 ID가 누락되었습니다.",
-    "RES_DATE_002": "날짜를 입력해주세요.",
-    "RES_DATE_003": "오늘 이전의 날짜는 예약 가능 날짜로 등록할 수 없습니다.",
-    "RES_DATE_004": "등록된 날짜 정보를 찾을 수 없습니다.",
-    "RES_DATE_005": "이미 등록되어 있는 날짜입니다. 목록에서 확인해주세요.",
-    "RES_DATE_006": "날짜 상태 변경 중 오류가 발생했습니다.",
-
-    // Reservation Time
-    "RES_TIME_001": "시간 ID가 누락되었습니다.",
-    "RES_TIME_002": "시작 시간을 입력해주세요.",
-    "RES_TIME_003": "등록된 시간 정보를 찾을 수 없습니다.",
-    "RES_TIME_004": "이미 등록되어 있는 시간입니다. 목록에서 확인해주세요.",
-    "RES_TIME_005": "시간 상태 변경 중 오류가 발생했습니다.",
-
-    // Theme
-    "THEME_001": "테마 ID가 누락되었습니다.",
-    "THEME_002": "테마 이름을 입력해주세요.",
-    "THEME_003": "테마 설명을 입력해주세요.",
-    "THEME_004": "테마 썸네일 URL을 입력해주세요.",
-    "THEME_005": "테마 정보를 찾을 수 없습니다.",
-    "THEME_006": "동일한 이름의 테마가 이미 등록되어 있습니다. 다른 이름을 사용해주세요.",
-    "THEME_007": "테마 상태 변경 중 오류가 발생했습니다."
 };
 
 async function handleResponseError(response, defaultMessage) {
@@ -58,31 +34,35 @@ async function handleResponseError(response, defaultMessage) {
     }
 }
 
-let searchedName = null;
 let reschedulingReservation = null;
 let selectedDate = null;
 let selectedTime = null;
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const params = new URLSearchParams(window.location.search);
-    const name = params.get("name");
-
-    if (name) {
-        const input = document.getElementById("lookup-name-input");
-        input.value = name;
-        await searchReservations();
-    }
-});
-
-async function searchReservations() {
-    const name = document.getElementById("lookup-name-input").value.trim();
-
-    if (!name) {
-        alert("예약자 성함을 입력해주세요.");
+async function authFetch(url, options = {}) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        location.href = "/";
         return;
     }
 
-    const response = await fetch(`/member/reservations/${encodeURIComponent(name)}`);
+    const headers = {
+        ...options.headers,
+        "Authorization": `Bearer ${token}`
+    };
+
+    return fetch(url, { ...options, headers });
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    if (!localStorage.getItem("token")) {
+        location.href = "/";
+        return;
+    }
+    await loadMyReservations();
+});
+
+async function loadMyReservations() {
+    const response = await authFetch("/member/my-reservations");
 
     if (!response.ok) {
         await handleResponseError(response, "예약 내역을 불러오지 못했습니다.");
@@ -90,12 +70,6 @@ async function searchReservations() {
     }
 
     const reservations = await response.json();
-
-    searchedName = name;
-
-    document.getElementById("lookup-name-text").textContent = name;
-    document.getElementById("lookup-result-section").classList.remove("hidden");
-
     renderReservations(reservations);
 }
 
@@ -117,22 +91,20 @@ function renderReservations(reservations) {
         article.className = "reservation-result-card";
 
         const isCanceled = reservation.status === "CANCELED";
-        const thumbnailUrl = getThemeThumbnailUrl(reservation);
 
         article.innerHTML = `
             <div class="reservation-thumbnail-box">
                 <img
                     class="reservation-thumbnail"
-                    src="${thumbnailUrl}"
-                    alt="${getThemeName(reservation)}"
+                    src="${reservation.themeThumbnailUrl}"
+                    alt="${reservation.themeName}"
                 >
             </div>
 
             <div class="reservation-result-info">
-                <h3>${getThemeName(reservation)}</h3>
-                <p>예약자: ${reservation.name}</p>
-                <p>날짜: ${getReservationDate(reservation)}</p>
-                <p>시간: ${formatTime(getReservationTime(reservation))}</p>
+                <h3>${reservation.themeName}</h3>
+                <p>날짜: ${reservation.date}</p>
+                <p>시간: ${formatTime(reservation.time)}</p>
                 <p>상태: ${formatStatus(reservation.status)}</p>
 
                 <div class="button-group">
@@ -190,7 +162,7 @@ function closeRescheduleModal() {
 }
 
 async function loadRescheduleDates() {
-    const response = await fetch("/member/dates");
+    const response = await authFetch("/member/dates");
 
     if (!response.ok) {
         await handleResponseError(response, "날짜 목록을 불러오지 못했습니다.");
@@ -228,8 +200,8 @@ async function loadRescheduleDates() {
 }
 
 async function loadRescheduleTimes() {
-    const themeId = reschedulingReservation.theme ? reschedulingReservation.theme.id : reschedulingReservation.themeId;
-    const response = await fetch(`/member/times?dateId=${selectedDate.id}&themeId=${themeId}`);
+    const themeId = reschedulingReservation.themeId;
+    const response = await authFetch(`/member/times?dateId=${selectedDate.id}&themeId=${themeId}`);
 
     if (!response.ok) {
         await handleResponseError(response, "예약 가능 시간을 불러오지 못했습니다.");
@@ -270,7 +242,7 @@ async function submitReschedule() {
         return;
     }
 
-    const response = await fetch(`/member/reservations/${reschedulingReservation.id}/schedule?name=${encodeURIComponent(searchedName)}`, {
+    const response = await authFetch(`/member/reservations/${reschedulingReservation.id}/schedule`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json"
@@ -288,37 +260,17 @@ async function submitReschedule() {
 
     alert("예약이 변경되었습니다.");
     closeRescheduleModal();
-    await reloadReservationsBySearchedName();
-}
-
-function getThemeThumbnailUrl(reservation) {
-    if (reservation.themeThumbnailUrl) {
-        return reservation.themeThumbnailUrl;
-    }
-
-    return "";
+    await loadMyReservations();
 }
 
 async function cancelReservation(reservationId) {
-    if (!searchedName) {
-        alert("예약자 성함으로 다시 조회해주세요.");
-        return;
-    }
-
     const confirmed = confirm("예약을 취소하시겠습니까?");
-
     if (!confirmed) {
         return;
     }
 
-    const response = await fetch(`/member/reservations/${reservationId}/cancel`, {
-        method: "PATCH",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            name: searchedName
-        })
+    const response = await authFetch(`/member/reservations/${reservationId}/cancel`, {
+        method: "PATCH"
     });
 
     if (!response.ok) {
@@ -327,59 +279,18 @@ async function cancelReservation(reservationId) {
     }
 
     alert("예약이 취소되었습니다.");
-
-    await reloadReservationsBySearchedName();
+    await loadMyReservations();
 }
 
-async function reloadReservationsBySearchedName() {
-    if (!searchedName) {
-        return;
-    }
-
-    const response = await fetch(`/member/reservations/${encodeURIComponent(searchedName)}`);
-
-    if (!response.ok) {
-        await handleResponseError(response, "예약 내역을 다시 불러오지 못했습니다.");
-        return;
-    }
-
-    const reservations = await response.json();
-
-    document.getElementById("lookup-name-text").textContent = searchedName;
-    document.getElementById("lookup-result-section").classList.remove("hidden");
-
-    renderReservations(reservations);
-}
-
-function getThemeName(reservation) {
-    if (reservation.themeName) {
-        return reservation.themeName;
-    }
-
-    return "테마 정보 없음";
-}
-
-function getReservationDate(reservation) {
-    if (reservation.date) {
-        return reservation.date;
-    }
-
-    return "";
-}
-
-function getReservationTime(reservation) {
-    if (reservation.time) {
-        return reservation.time;
-    }
-
-    return "";
+function logout() {
+    localStorage.removeItem("token");
+    location.href = "/";
 }
 
 function formatTime(value) {
     if (!value) {
         return "";
     }
-
     const parts = value.split(":");
     return `${parts[0]}:${parts[1]}`;
 }
@@ -388,10 +299,8 @@ function formatStatus(status) {
     if (status === "RESERVED") {
         return "예약 완료";
     }
-
     if (status === "CANCELED") {
         return "예약 취소";
     }
-
     return status;
 }

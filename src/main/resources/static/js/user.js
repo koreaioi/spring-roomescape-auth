@@ -62,7 +62,26 @@ let selectedDate = null;
 let selectedTheme = null;
 let selectedTime = null;
 
+async function authFetch(url, options = {}) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        location.href = "/";
+        return;
+    }
+
+    const headers = {
+        ...options.headers,
+        "Authorization": `Bearer ${token}`
+    };
+
+    return fetch(url, { ...options, headers });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
+    if (!localStorage.getItem("token")) {
+        location.href = "/";
+        return;
+    }
     await loadThemes();
     await loadPopularThemes();
     await loadDates();
@@ -71,7 +90,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function loadPopularThemes() {
     const popularThemeList = document.getElementById("popular-theme-list");
 
-    const response = await fetch("/member/themes/popular?top=10");
+    const response = await authFetch("/member/themes/popular?top=10");
 
     if (!response.ok) {
         popularThemeList.innerHTML = `
@@ -122,7 +141,7 @@ async function loadPopularThemes() {
 }
 
 async function loadDates() {
-    const response = await fetch("/member/dates");
+    const response = await authFetch("/member/dates");
 
     if (!response.ok) {
         await handleResponseError(response, "날짜 목록을 불러오지 못했습니다.");
@@ -160,7 +179,7 @@ async function loadDates() {
 }
 
 async function loadThemes() {
-    const response = await fetch("/member/themes");
+    const response = await authFetch("/member/themes");
 
     if (!response.ok) {
         await handleResponseError(response, "테마 목록을 불러오지 못했습니다.");
@@ -235,11 +254,10 @@ function goBackToSelectStep() {
     document.getElementById("select-section").classList.remove("hidden");
 
     selectedTime = null;
-    document.getElementById("reservation-name-input").value = "";
 }
 
 async function loadAvailableTimes() {
-    const response = await fetch(`/member/times?dateId=${selectedDate.id}&themeId=${selectedTheme.id}`);
+    const response = await authFetch(`/member/times?dateId=${selectedDate.id}&themeId=${selectedTheme.id}`);
 
     if (!response.ok) {
         await handleResponseError(response, "예약 가능 시간을 불러오지 못했습니다.");
@@ -276,26 +294,18 @@ async function loadAvailableTimes() {
 }
 
 async function createReservation() {
-    const name = document.getElementById("reservation-name-input").value.trim();
-
     if (!selectedTime) {
         alert("방문 시간을 선택해주세요.");
         return;
     }
 
-    if (!name) {
-        alert("예약자 성함을 입력해주세요.");
-        return;
-    }
-
     const requestBody = {
-        name: name,
         dateId: selectedDate.id,
         timeId: selectedTime.id,
         themeId: selectedTheme.id
     };
 
-    const response = await fetch("/member/reservations", {
+    const response = await authFetch("/member/reservations", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -309,7 +319,12 @@ async function createReservation() {
     }
 
     alert("예약이 완료되었습니다.");
-    location.href = `/reservation-lookup?name=${encodeURIComponent(name)}`;
+    location.href = "/reservation-lookup";
+}
+
+function logout() {
+    localStorage.removeItem("token");
+    location.href = "/";
 }
 
 function formatTime(value) {

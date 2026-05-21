@@ -10,9 +10,9 @@
     <a class="logo" href="/">ENIGMA ROOMS</a>
 
     <nav class="nav">
-        <a href="/">예약하기</a>
+        <a href="/reservation">예약하기</a>
         <a href="/reservation-lookup">예약 조회</a>
-        <a href="/admin-page">관리자</a>
+        <button class="logout-button" type="button" onclick="logout()">로그아웃</button>
     </nav>
 </header>
 
@@ -50,7 +50,7 @@
         </div>
     </section>
 
-    <!-- 2단계: 시간 + 이름 입력 -->
+    <!-- 2단계: 시간 입력 -->
     <section id="confirm-section" class="confirm-section hidden">
         <button class="back-button" type="button" onclick="goBackToSelectStep()">← 뒤로 가기</button>
 
@@ -64,11 +64,6 @@
                 <section class="form-group">
                     <h2>방문 시간</h2>
                     <div id="time-list" class="time-list"></div>
-                </section>
-
-                <section class="form-group">
-                    <h2>예약자 성함</h2>
-                    <input id="reservation-name-input" class="name-input" type="text" placeholder="이름을 입력하세요">
                 </section>
 
                 <button class="primary-button full" type="button" onclick="createReservation()">

@@ -7,6 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class PageController {
 
     @GetMapping("/")
+    public String indexPage() {
+        return "index";
+    }
+
+    @GetMapping("/reservation")
     public String userPage() {
         return "user";
     }
@@ -14,6 +19,11 @@ public class PageController {
     @GetMapping("/reservation-lookup")
     public String reservationLookupPage() {
         return "reservation-lookup";
+    }
+
+    @GetMapping("/admin-login")
+    public String adminLoginPage() {
+        return "admin-login";
     }
 
     @GetMapping("/admin-page")

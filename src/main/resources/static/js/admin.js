@@ -21,30 +21,6 @@ const ERROR_MESSAGES = {
     "RES_010": "이미 지난 예약은 변경하거나 취소할 수 없습니다.",
     "RES_011": "과거 날짜나 시간으로는 예약할 수 없습니다.",
     "RES_012": "과거 날짜나 시간으로 일정을 변경할 수 없습니다.",
-
-    // Reservation Date
-    "RES_DATE_001": "날짜 ID가 누락되었습니다.",
-    "RES_DATE_002": "날짜를 입력해주세요.",
-    "RES_DATE_003": "오늘 이전의 날짜는 예약 가능 날짜로 등록할 수 없습니다.",
-    "RES_DATE_004": "등록된 날짜 정보를 찾을 수 없습니다.",
-    "RES_DATE_005": "이미 등록되어 있는 날짜입니다. 목록에서 확인해주세요.",
-    "RES_DATE_006": "날짜 상태 변경 중 오류가 발생했습니다.",
-
-    // Reservation Time
-    "RES_TIME_001": "시간 ID가 누락되었습니다.",
-    "RES_TIME_002": "시작 시간을 입력해주세요.",
-    "RES_TIME_003": "등록된 시간 정보를 찾을 수 없습니다.",
-    "RES_TIME_004": "이미 등록되어 있는 시간입니다. 목록에서 확인해주세요.",
-    "RES_TIME_005": "시간 상태 변경 중 오류가 발생했습니다.",
-
-    // Theme
-    "THEME_001": "테마 ID가 누락되었습니다.",
-    "THEME_002": "테마 이름을 입력해주세요.",
-    "THEME_003": "테마 설명을 입력해주세요.",
-    "THEME_004": "테마 썸네일 URL을 입력해주세요.",
-    "THEME_005": "테마 정보를 찾을 수 없습니다.",
-    "THEME_006": "동일한 이름의 테마가 이미 등록되어 있습니다. 다른 이름을 사용해주세요.",
-    "THEME_007": "테마 상태 변경 중 오류가 발생했습니다."
 };
 
 async function handleResponseError(response, defaultMessage) {
@@ -58,7 +34,32 @@ async function handleResponseError(response, defaultMessage) {
     }
 }
 
+async function authFetch(url, options = {}) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        location.href = "/admin-login";
+        return;
+    }
+
+    const headers = {
+        ...options.headers,
+        "Authorization": `Bearer ${token}`
+    };
+
+    const response = await fetch(url, { ...options, headers });
+    if (response.status === 401 || response.status === 403) {
+        alert("권한이 없습니다. 다시 로그인해주세요.");
+        location.href = "/admin-login";
+        return;
+    }
+    return response;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+    if (!localStorage.getItem("token")) {
+        location.href = "/admin-login";
+        return;
+    }
     initTabs();
     initDatePicker();
     initTimeSelectBox();
@@ -135,12 +136,8 @@ function initTimeSelectBox() {
 
 // 날짜 관리
 async function loadDates() {
-    const response = await fetch("/admin/dates");
-
-    if (!response.ok) {
-        await handleResponseError(response, "날짜 목록을 불러오지 못했습니다.");
-        return;
-    }
+    const response = await authFetch("/admin/dates");
+    if (!response || !response.ok) return;
 
     const dates = await response.json();
 
@@ -181,61 +178,45 @@ async function createDate() {
         return;
     }
 
-    const response = await fetch("/admin/dates", {
+    const response = await authFetch("/admin/dates", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date })
     });
 
-    if (!response.ok) {
-        await handleResponseError(response, "날짜 추가에 실패했습니다.");
+    if (!response || !response.ok) {
+        if (response) await handleResponseError(response, "날짜 추가에 실패했습니다.");
         return;
     }
 
     dateInput.value = "";
     selectedDateText.textContent = "날짜를 선택하세요";
-
     await loadDates();
 }
 
 async function updateDateStatus(id, isActive) {
-    const message = isActive
-        ? "해당 날짜를 활성화하시겠습니까?"
-        : "해당 날짜를 비활성화하시겠습니까?";
+    const message = isActive ? "해당 날짜를 활성화하시겠습니까?" : "해당 날짜를 비활성화하시겠습니까?";
+    if (!confirm(message)) return;
 
-    if (!confirm(message)) {
-        return;
-    }
-
-    const response = await fetch(`/admin/dates/${id}/status`, {
+    const response = await authFetch(`/admin/dates/${id}/status`, {
         method: "PATCH",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive })
     });
 
-    if (!response.ok) {
-        await handleResponseError(response, "날짜 상태 변경에 실패했습니다.");
+    if (!response || !response.ok) {
+        if (response) await handleResponseError(response, "날짜 상태 변경에 실패했습니다.");
         return;
     }
-
     await loadDates();
 }
 
 // 시간 관리
 async function loadTimes() {
-    const response = await fetch("/admin/times");
-
-    if (!response.ok) {
-        await handleResponseError(response, "시간 목록을 불러오지 못했습니다.");
-        return;
-    }
+    const response = await authFetch("/admin/times");
+    if (!response || !response.ok) return;
 
     const times = await response.json();
-
     const tbody = document.getElementById("time-table-body");
     tbody.innerHTML = "";
 
@@ -268,67 +249,40 @@ async function createTime() {
     const minute = document.getElementById("minute-select").value;
     const startAt = `${hour}:${minute}:00`;
 
-    const response = await fetch("/admin/times", {
+    const response = await authFetch("/admin/times", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ startAt })
     });
 
-    if (!response.ok) {
-        await handleResponseError(response, "시간 추가에 실패했습니다.");
+    if (!response || !response.ok) {
+        if (response) await handleResponseError(response, "시간 추가에 실패했습니다.");
         return;
     }
-
     await loadTimes();
 }
 
 async function updateTimeStatus(id, isActive) {
-    const message = isActive
-        ? "해당 시간을 활성화하시겠습니까?"
-        : "해당 시간을 비활성화하시겠습니까?";
+    const message = isActive ? "해당 시간을 활성화하시겠습니까?" : "해당 시간을 비활성화하시겠습니까?";
+    if (!confirm(message)) return;
 
-    if (!confirm(message)) {
-        return;
-    }
-
-    const response = await fetch(`/admin/times/${id}/status`, {
+    const response = await authFetch(`/admin/times/${id}/status`, {
         method: "PATCH",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive })
     });
 
-    if (!response.ok) {
-        await handleResponseError(response, "시간 상태 변경에 실패했습니다.");
+    if (!response || !response.ok) {
+        if (response) await handleResponseError(response, "시간 상태 변경에 실패했습니다.");
         return;
     }
-
     await loadTimes();
-}
-
-function formatTime(value) {
-    if (!value) {
-        return "";
-    }
-
-    const parts = value.split(":");
-    const hour = parts[0];
-    const minute = parts[1];
-    const second = parts[2] ?? "00";
-
-    return `${hour}:${minute}:${second}`;
 }
 
 // 테마 관리
 async function loadThemes() {
-    const response = await fetch("/admin/themes");
-    if (!response.ok) {
-        await handleResponseError(response, "테마 목록을 불러오지 못했습니다.");
-        return;
-    }
+    const response = await authFetch("/admin/themes");
+    if (!response || !response.ok) return;
     const themes = await response.json();
 
     const tbody = document.getElementById("theme-table-body");
@@ -366,44 +320,34 @@ async function createTheme() {
         return;
     }
 
-    const response = await fetch("/admin/themes", {
+    const response = await authFetch("/admin/themes", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            name,
-            description,
-            thumbnailUrl
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, description, thumbnailUrl })
     });
 
-    if (!response.ok) {
-        await handleResponseError(response, "테마 추가에 실패했습니다.");
+    if (!response || !response.ok) {
+        if (response) await handleResponseError(response, "테마 추가에 실패했습니다.");
         return;
     }
 
     document.getElementById("theme-name-input").value = "";
     document.getElementById("theme-description-input").value = "";
     document.getElementById("theme-thumbnail-input").value = "";
-
     await loadThemes();
 }
 
 async function toggleThemeStatus(id, isActive) {
-    const response = await fetch(`/admin/themes/${id}`, {
+    const response = await authFetch(`/admin/themes/${id}`, {
         method: "PATCH",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive })
     });
 
-    if (!response.ok) {
-        await handleResponseError(response, "테마 상태 변경에 실패했습니다.");
+    if (!response || !response.ok) {
+        if (response) await handleResponseError(response, "테마 상태 변경에 실패했습니다.");
         return;
     }
-
     await loadThemes();
 }
 
@@ -414,11 +358,8 @@ let selectedDate = null;
 let selectedTime = null;
 
 async function loadReservations() {
-    const response = await fetch("/admin/reservations");
-    if (!response.ok) {
-        await handleResponseError(response, "예약 목록을 불러오지 못했습니다.");
-        return;
-    }
+    const response = await authFetch("/admin/reservations");
+    if (!response || !response.ok) return;
     reservations = await response.json();
 
     const tbody = document.getElementById("reservation-table-body");
@@ -476,12 +417,8 @@ function closeRescheduleModal() {
 }
 
 async function loadRescheduleDates() {
-    const response = await fetch("/member/dates");
-
-    if (!response.ok) {
-        await handleResponseError(response, "날짜 목록을 불러오지 못했습니다.");
-        return;
-    }
+    const response = await authFetch("/member/dates");
+    if (!response || !response.ok) return;
 
     const dates = await response.json();
     const dateList = document.getElementById("reschedule-date-list");
@@ -495,15 +432,11 @@ async function loadRescheduleDates() {
         const button = document.createElement("button");
         button.className = "date-card";
         button.type = "button";
-        button.innerHTML = `
-            <span class="month">${month}</span>
-            <span class="day">${day}</span>
-        `;
+        button.innerHTML = `<span class="month">${month}</span><span class="day">${day}</span>`;
 
         button.addEventListener("click", () => {
             document.querySelectorAll("#reschedule-date-list .date-card")
                 .forEach(item => item.classList.remove("selected"));
-
             button.classList.add("selected");
             selectedDate = date;
             loadRescheduleTimes();
@@ -515,12 +448,8 @@ async function loadRescheduleDates() {
 
 async function loadRescheduleTimes() {
     const themeId = reschedulingReservation.themeId;
-    const response = await fetch(`/member/times?dateId=${selectedDate.id}&themeId=${themeId}`);
-
-    if (!response.ok) {
-        await handleResponseError(response, "예약 가능 시간을 불러오지 못했습니다.");
-        return;
-    }
+    const response = await authFetch(`/member/times?dateId=${selectedDate.id}&themeId=${themeId}`);
+    if (!response || !response.ok) return;
 
     const times = await response.json();
     const timeList = document.getElementById("reschedule-time-list");
@@ -541,7 +470,6 @@ async function loadRescheduleTimes() {
         button.addEventListener("click", () => {
             document.querySelectorAll("#reschedule-time-list .time-button")
                 .forEach(item => item.classList.remove("selected"));
-
             button.classList.add("selected");
             selectedTime = time;
         });
@@ -556,19 +484,14 @@ async function submitReschedule() {
         return;
     }
 
-    const response = await fetch(`/admin/reservations/${reschedulingReservation.id}/schedule`, {
+    const response = await authFetch(`/admin/reservations/${reschedulingReservation.id}/schedule`, {
         method: "PATCH",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            dateId: selectedDate.id,
-            timeId: selectedTime.id
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dateId: selectedDate.id, timeId: selectedTime.id })
     });
 
-    if (!response.ok) {
-        await handleResponseError(response, "예약 변경에 실패했습니다.");
+    if (!response || !response.ok) {
+        if (response) await handleResponseError(response, "예약 변경에 실패했습니다.");
         return;
     }
 
@@ -578,33 +501,21 @@ async function submitReschedule() {
 }
 
 async function cancelReservation(id) {
-    if (!confirm("해당 예약을 취소하시겠습니까?")) {
+    if (!confirm("해당 예약을 취소하시겠습니까?")) return;
+
+    const response = await authFetch(`/admin/reservations/${id}/cancel`, { method: "PATCH" });
+    if (!response || !response.ok) {
+        if (response) await handleResponseError(response, "예약 취소에 실패했습니다.");
         return;
     }
-
-    const response = await fetch(`/admin/reservations/${id}/cancel`, {
-        method: "PATCH"
-    });
-
-    if (!response.ok) {
-        await handleResponseError(response, "예약 취소에 실패했습니다.");
-        return;
-    }
-
     await loadReservations();
 }
 
 async function loadPopularThemes() {
     const popularThemeList = document.getElementById("popular-theme-list");
-
-    const response = await fetch("/admin/themes/popular?top=10");
-
-    if (!response.ok) {
-        popularThemeList.innerHTML = `
-            <div class="popular-admin-empty">
-                인기 테마를 불러오지 못했습니다.
-            </div>
-        `;
+    const response = await authFetch("/admin/themes/popular?top=10");
+    if (!response || !response.ok) {
+        popularThemeList.innerHTML = `<div class="popular-admin-empty">인기 테마를 불러오지 못했습니다.</div>`;
         return;
     }
 
@@ -612,11 +523,7 @@ async function loadPopularThemes() {
     popularThemeList.innerHTML = "";
 
     if (themes.length === 0) {
-        popularThemeList.innerHTML = `
-            <div class="popular-admin-empty">
-                아직 인기 테마 데이터가 없습니다.
-            </div>
-        `;
+        popularThemeList.innerHTML = `<div class="popular-admin-empty">아직 인기 테마 데이터가 없습니다.</div>`;
         return;
     }
 
@@ -627,17 +534,13 @@ async function loadPopularThemes() {
         popularThemeList.insertAdjacentHTML("beforeend", `
             <article class="popular-admin-card">
                 <div class="popular-admin-rank">${index + 1}</div>
-
                 <img src="${theme.thumbnailUrl}" alt="${theme.name}">
-
                 <div class="popular-admin-content">
                     <div class="popular-admin-title-row">
                         <h3>${theme.name}</h3>
                         <span class="badge ${statusClass}">${statusText}</span>
                     </div>
-
                     <p>${theme.description}</p>
-
                     <div class="popular-admin-count">
                         <span>예약 횟수</span>
                         <strong>${theme.reservationCount}</strong>
@@ -646,4 +549,10 @@ async function loadPopularThemes() {
             </article>
         `);
     });
+}
+
+function formatTime(value) {
+    if (!value) return "";
+    const parts = value.split(":");
+    return `${parts[0]}:${parts[1]}:${parts[2] ?? "00"}`;
 }
