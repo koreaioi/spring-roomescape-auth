@@ -43,7 +43,7 @@ async function login(name, password) {
     if (response.ok) {
         const token = response.headers.get("Authorization");
         localStorage.setItem("token", token);
-        location.href = "/reservation";
+        location.href = "/stores";
     } else {
         alert("로그인에 실패했습니다.");
     }

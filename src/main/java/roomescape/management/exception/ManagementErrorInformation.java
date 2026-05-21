@@ -10,6 +10,7 @@ import roomescape.common.exception.ErrorInformation;
 public enum ManagementErrorInformation implements ErrorInformation {
 
     NO_MANAGEMENT_STORE(HttpStatus.BAD_REQUEST, "MANAGEMENT_001", "관리하는 매장이 없습니다."),
+    NO_MANAGED_STORE(HttpStatus.BAD_REQUEST, "MANAGEMENT_002", "관리하는 매장이 아닙니다."),
     ;
 
     private final HttpStatus httpStatus;

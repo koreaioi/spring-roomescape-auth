@@ -1,9 +1,12 @@
 package roomescape.store.domain;
 
 import roomescape.management.domain.Management;
+import roomescape.management.exception.ManagementException;
 
 import java.util.List;
 import java.util.Objects;
+
+import static roomescape.management.exception.ManagementErrorInformation.NO_MANAGED_STORE;
 
 public record ManagedStore(
         List<Store> managedStores
@@ -20,7 +23,7 @@ public record ManagedStore(
         boolean matched = managedStores.stream()
                 .anyMatch(managedStore -> Objects.equals(managedStore.getId(), store.getId()));
         if (!matched) {
-            throw new IllegalArgumentException("관리하는 매장이 아닙니다."); // TODO
+            throw new ManagementException(NO_MANAGED_STORE);
         }
     }
 

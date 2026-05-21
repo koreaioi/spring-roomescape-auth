@@ -44,7 +44,11 @@ const ERROR_MESSAGES = {
     "THEME_004": "테마 썸네일 URL을 입력해주세요.",
     "THEME_005": "테마 정보를 찾을 수 없습니다.",
     "THEME_006": "동일한 이름의 테마가 이미 등록되어 있습니다. 다른 이름을 사용해주세요.",
-    "THEME_007": "테마 상태 변경 중 오류가 발생했습니다."
+    "THEME_007": "테마 상태 변경 중 오류가 발생했습니다.",
+
+    // Management
+    "MANAGEMENT_001": "관리 권한이 있는 매장을 찾을 수 없습니다.",
+    "MANAGEMENT_002": "담당하신 매장의 예약만 관리하실 수 있습니다. 확인 후 다시 시도해주세요."
 };
 
 async function handleResponseError(response, defaultMessage) {
@@ -61,6 +65,7 @@ async function handleResponseError(response, defaultMessage) {
 let selectedDate = null;
 let selectedTheme = null;
 let selectedTime = null;
+let storeId = null;
 
 async function authFetch(url, options = {}) {
     const token = localStorage.getItem("token");
@@ -82,6 +87,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         location.href = "/";
         return;
     }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    storeId = urlParams.get('storeId');
+
+    if (!storeId) {
+        alert("매장을 선택해주세요.");
+        location.href = "/stores";
+        return;
+    }
+
     await loadThemes();
     await loadPopularThemes();
     await loadDates();
@@ -302,7 +317,8 @@ async function createReservation() {
     const requestBody = {
         dateId: selectedDate.id,
         timeId: selectedTime.id,
-        themeId: selectedTheme.id
+        themeId: selectedTheme.id,
+        storeId: Number(storeId)
     };
 
     const response = await authFetch("/member/reservations", {

@@ -71,9 +71,30 @@ public class ReservationService {
     }
 
     @Transactional
+    public Reservation reserveByManager(String name, ReservationSaveCommand command, ManagedStore managedStore) {
+        Store store = getStore(command.storeId());
+        validateManagedStore(managedStore, store);
+
+        ReservationTime reservationTime = getReservationTime(command.timeId());
+        reservationTime.validateIsInactive();
+
+        ReservationDate reservationDate = getReservationDate(command.dateId());
+        reservationDate.validateIsInactive();
+
+        Theme theme = getTheme(command.themeId());
+        theme.validateIsInactive();
+
+
+        validateNotAlreadyBookedByOthers(reservationDate.getId(), reservationTime.getId(), theme.getId());
+        return reservationRepository.save(
+                Reservation.create(name, reservationDate, reservationTime, theme, store)
+        );
+    }
+
+    @Transactional
     public Reservation cancelByManager(Long id, ManagedStore managedStore) {
         Reservation reservation = getReservation(id);
-        validateManagedStore(managedStore, reservation);
+        validateManagedStore(managedStore, reservation.getStore());
 
         reservation.updateStatus(CANCELED);
         reservationRepository.updateStatus(reservation);
@@ -107,7 +128,7 @@ public class ReservationService {
     @Transactional
     public Reservation changeScheduleByManager(ReservationChangeCommand command, ManagedStore managedStore) {
         Reservation reservation = getReservation(command.id());
-        validateManagedStore(managedStore, reservation);
+        validateManagedStore(managedStore, reservation.getStore());
 
         ReservationTime newTime = getReservationTime(command.timeId());
         newTime.validateIsInactive();
@@ -153,8 +174,7 @@ public class ReservationService {
         }
     }
 
-    private void validateManagedStore(ManagedStore managedStore, Reservation reservation) {
-        Store store = reservation.getStore();
+    private void validateManagedStore(ManagedStore managedStore, Store store) {
         managedStore.validateCanManage(store);
     }
 

@@ -16,6 +16,11 @@ public class PageController {
         return "user";
     }
 
+    @GetMapping("/stores")
+    public String storesPage() {
+        return "stores";
+    }
+
     @GetMapping("/reservation-lookup")
     public String reservationLookupPage() {
         return "reservation-lookup";

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ENIGMA ROOMS - 매장 선택</title>
+    <link rel="stylesheet" th:href="@{/css/user.css}">
+    <style>
+        .store-container {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 20px;
+        }
+        .store-container h1 {
+            text-align: center;
+            color: #d2b44c;
+            margin-bottom: 40px;
+        }
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 24px;
+        }
+        .store-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .store-card:hover {
+            transform: translateY(-5px);
+            border-color: #d2b44c;
+        }
+        .store-card h3 {
+            color: #fff;
+            margin: 0;
+            font-size: 1.4em;
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <a class="logo" href="/">ENIGMA ROOMS</a>
+</header>
+
+<main class="store-container">
+    <h1>매장을 선택해주세요</h1>
+    <div id="store-list" class="store-grid">
+        <!-- 매장 목록이 여기에 로드됩니다 -->
+    </div>
+</main>
+
+<script>
+    async function loadStores() {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            location.href = "/";
+            return;
+        }
+
+        const response = await fetch("/member/stores", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            alert("매장 목록을 불러오지 못했습니다.");
+            return;
+        }
+
+        const stores = await response.json();
+        const storeList = document.getElementById("store-list");
+        storeList.innerHTML = "";
+
+        stores.forEach(store => {
+            const card = document.createElement("div");
+            card.className = "store-card";
+            card.innerHTML = `<h3>${store.name}</h3>`;
+            card.onclick = () => {
+                location.href = `/reservation?storeId=${store.id}`;
+            };
+            storeList.appendChild(card);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", loadStores);
+</script>
+</body>
+</html>

@@ -45,7 +45,7 @@ public class ManagedStoreArgumentResolver implements HandlerMethodArgumentResolv
 
         List<Management> managements = managementRepository.findAllByManagerId(managerId);
         if (managements.isEmpty()) {
-            throw new ManagementException(NO_MANAGEMENT_STORE); // TODO
+            throw new ManagementException(NO_MANAGEMENT_STORE);
         }
 
         return ManagedStore.from(managements);
