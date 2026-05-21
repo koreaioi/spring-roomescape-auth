@@ -49,32 +49,38 @@ WHERE NOT EXISTS (
     WHERE t.name = v.name
 );
 
+-- Store Dummy Data
+INSERT INTO store (name) VALUES ('강남점');
+INSERT INTO store (name) VALUES ('판교점');
+INSERT INTO store (name) VALUES ('홍대점');
+
 -- Reservation Dummy Data
-INSERT INTO reservation (name, date_id, time_id, theme_id, status)
+INSERT INTO reservation (name, date_id, time_id, theme_id, store_id, status)
 SELECT
     v.name,
     rd.id AS date_id,
     rt.id AS time_id,
     t.id AS theme_id,
+    v.store_id,
     v.status
 FROM (
          VALUES
-             ('김민준', DATEADD('DAY', 0, CURRENT_DATE), '11:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('이서연', DATEADD('DAY', 0, CURRENT_DATE), '12:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('박지후', DATEADD('DAY', 0, CURRENT_DATE), '13:00:00', '사라진 탐정', 'RESERVED'),
-             ('최하은', DATEADD('DAY', -1, CURRENT_DATE), '11:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('정도윤', DATEADD('DAY', -1, CURRENT_DATE), '14:00:00', '고대 유적의 비밀', 'RESERVED'),
-             ('한지민', DATEADD('DAY', -1, CURRENT_DATE), '15:00:00', '사라진 탐정', 'RESERVED'),
-             ('윤서준', DATEADD('DAY', -1, CURRENT_DATE), '16:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('오지아', DATEADD('DAY', -2, CURRENT_DATE), '17:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('강민재', DATEADD('DAY', -2, CURRENT_DATE), '18:00:00', '고대 유적의 비밀', 'RESERVED'),
-             ('신예린', DATEADD('DAY', -3, CURRENT_DATE), '11:00:00', '사라진 탐정', 'RESERVED'),
-             ('송우석', DATEADD('DAY', -3, CURRENT_DATE), '19:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('장하준', DATEADD('DAY', -3, CURRENT_DATE), '20:00:00', '유령 호텔', 'RESERVED'),
-             ('임수아', DATEADD('DAY', -4, CURRENT_DATE), '12:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('문지호', DATEADD('DAY', -4, CURRENT_DATE), '13:00:00', '고대 유적의 비밀', 'RESERVED'),
-             ('백서윤', DATEADD('DAY', -4, CURRENT_DATE), '21:00:00', '유령 호텔', 'CANCELED')
-     ) AS v(name, reservation_date, start_at, theme_name, status)
+             ('김민준', DATEADD('DAY', 0, CURRENT_DATE), '11:00:00', '잠겨버린 연구실', 1, 'RESERVED'),
+             ('이서연', DATEADD('DAY', 0, CURRENT_DATE), '12:00:00', '잠겨버린 연구실', 1, 'RESERVED'),
+             ('박지후', DATEADD('DAY', 0, CURRENT_DATE), '13:00:00', '사라진 탐정', 1, 'RESERVED'),
+             ('최하은', DATEADD('DAY', -1, CURRENT_DATE), '11:00:00', '잠겨버린 연구실', 1, 'RESERVED'),
+             ('정도윤', DATEADD('DAY', -1, CURRENT_DATE), '14:00:00', '고대 유적의 비밀', 1, 'RESERVED'),
+             ('한지민', DATEADD('DAY', -1, CURRENT_DATE), '15:00:00', '사라진 탐정', 1, 'RESERVED'),
+             ('윤서준', DATEADD('DAY', -1, CURRENT_DATE), '16:00:00', '잠겨버린 연구실', 1, 'RESERVED'),
+             ('오지아', DATEADD('DAY', -2, CURRENT_DATE), '17:00:00', '잠겨버린 연구실', 2, 'RESERVED'),
+             ('강민재', DATEADD('DAY', -2, CURRENT_DATE), '18:00:00', '고대 유적의 비밀', 2, 'RESERVED'),
+             ('신예린', DATEADD('DAY', -3, CURRENT_DATE), '11:00:00', '사라진 탐정', 2, 'RESERVED'),
+             ('송우석', DATEADD('DAY', -3, CURRENT_DATE), '19:00:00', '잠겨버린 연구실', 3, 'RESERVED'),
+             ('장하준', DATEADD('DAY', -3, CURRENT_DATE), '20:00:00', '유령 호텔', 3, 'RESERVED'),
+             ('임수아', DATEADD('DAY', -4, CURRENT_DATE), '12:00:00', '잠겨버린 연구실', 3, 'RESERVED'),
+             ('문지호', DATEADD('DAY', -4, CURRENT_DATE), '13:00:00', '고대 유적의 비밀', 2, 'RESERVED'),
+             ('백서윤', DATEADD('DAY', -4, CURRENT_DATE), '21:00:00', '유령 호텔', 1, 'CANCELED')
+     ) AS v(name, reservation_date, start_at, theme_name, store_id, status)
          JOIN reservation_date rd ON rd.date = v.reservation_date
          JOIN reservation_time rt ON rt.start_at = v.start_at
          JOIN theme t ON t.name = v.theme_name
@@ -91,7 +97,9 @@ INSERT INTO member (name, password, role) VALUES ('admin', '8c6976e5b5410415bde9
 INSERT INTO member (name, password, role) VALUES ('member', 'e606e38b0d8c19b24cf0ee3802e858abc6f393291503e30128a158bda25d1109', 'MEMBER');
 INSERT INTO member (name, password, role) VALUES ('다른사람', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'MEMBER');
 INSERT INTO member (name, password, role) VALUES ('송송', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'MEMBER');
+INSERT INTO member (name, password, role) VALUES ('admin2', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'MANAGER');
 
-INSERT INTO store (name) VALUES ('강남점');
-INSERT INTO store (name) VALUES ('판교점');
-INSERT INTO store (name) VALUES ('홍대점');
+INSERT INTO management (manager_id, store_id) VALUES (1,1);
+INSERT INTO management (manager_id, store_id) VALUES (1,2);
+INSERT INTO management (manager_id, store_id) VALUES (5,2);
+INSERT INTO management (manager_id, store_id) VALUES (5,3);

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.exception.ReservationException;
+import roomescape.store.domain.Store;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -23,18 +24,19 @@ public class Reservation {
     private ReservationDate date;
     private ReservationTime time;
     private Theme theme;
+    private Store store;
     private ReservationStatus status;
 
-    public static Reservation create(String name, ReservationDate reservationDate, ReservationTime time, Theme theme) {
-        validate(name, reservationDate, time, theme);
+    public static Reservation create(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, Store store) {
+        validate(name, reservationDate, time, theme, store);
         validatePast(reservationDate.getDate(), time.getStartAt());
-        return new Reservation(null, name, reservationDate, time, theme, ReservationStatus.RESERVED);
+        return new Reservation(null, name, reservationDate, time, theme, store, ReservationStatus.RESERVED);
     }
 
-    public static Reservation load(Long id, String name, ReservationDate reservationDate, ReservationTime time, Theme theme, ReservationStatus status) {
-        validate(name, reservationDate, time, theme);
+    public static Reservation load(Long id, String name, ReservationDate reservationDate, ReservationTime time, Theme theme, Store store, ReservationStatus status) {
+        validate(name, reservationDate, time, theme, store);
         validateId(id);
-        return new Reservation(id, name, reservationDate, time, theme, status);
+        return new Reservation(id, name, reservationDate, time, theme, store, status);
     }
 
     public void cancel(String requesterName) {
@@ -64,11 +66,12 @@ public class Reservation {
         this.time = newTime;
     }
 
-    private static void validate(String name, ReservationDate reservationDate, ReservationTime time, Theme theme) {
+    private static void validate(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, Store store) {
         validateName(name);
         validateDate(reservationDate);
         validateTime(time);
         validateTheme(theme);
+        validateStore(store);
     }
 
     private static void validateName(String name) {
@@ -98,6 +101,13 @@ public class Reservation {
     private static void validateTheme(Theme theme) {
         if (theme == null) {
             throw new ReservationException(RESERVATION_THEME_IS_NULL);
+        }
+    }
+
+    private static void validateStore(Store store) {
+        if (store == null) {
+            // TODO: ErrorInformation for Store
+            throw new IllegalArgumentException("Store는 필수 입력값입니다.");
         }
     }
 

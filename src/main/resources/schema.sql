@@ -40,6 +40,16 @@ CREATE TABLE IF NOT EXISTS member
     PRIMARY KEY (id)
 );
 
+CREATE TABLE IF NOT EXISTS management
+(
+    id         BIGINT       NOT NULL AUTO_INCREMENT,
+    manager_id BIGINT       NOT NULL,
+    store_id   BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (manager_id) REFERENCES member (id),
+    FOREIGN KEY (store_id)   REFERENCES store (id)
+);
+
 CREATE TABLE IF NOT EXISTS reservation
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
@@ -47,9 +57,11 @@ CREATE TABLE IF NOT EXISTS reservation
     date_id  BIGINT       NOT NULL,
     time_id  BIGINT       NOT NULL,
     theme_id BIGINT       NOT NULL,
+    store_id BIGINT       NOT NULL,
     status   ENUM('RESERVED', 'CANCELED') NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (date_id) REFERENCES reservation_date (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id)
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    FOREIGN KEY (store_id) REFERENCES store (id)
 );
